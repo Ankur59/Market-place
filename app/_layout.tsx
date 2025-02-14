@@ -1,43 +1,28 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
-import { useColorScheme } from "react-native";
+import { Redirect, Slot } from "expo-router";
 import "react-native-reanimated";
 import "../global.css";
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
+``;
+import { tokenCache } from "@/cache";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
+const publishableKey =
+  "pk_test_ZXZvbHZlZC1maXJlZmx5LTUxLmNsZXJrLmFjY291bnRzLmRldiQ";
+if (!publishableKey) {
+  throw new Error("Missing publishableKey please provide it in your env file");
+}
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      {/* Redirects to the home page if the user is signed in */}
+      <SignedIn>
+        <Redirect href="../(auth)/home" />
+      </SignedIn>
+      
+      {/* Redirects to the welcome page if the user is not signed in */}
+      <SignedOut>
+        <Redirect href="../(public)/Welcome" />
+      </SignedOut>
+      <Slot />
+    </ClerkProvider>
   );
 }

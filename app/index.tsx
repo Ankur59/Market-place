@@ -1,14 +1,12 @@
-import { Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, ActivityIndicator } from "react-native";
+import React from "react";
 
-export default function Index() {
+const Index = () => {
   return (
-    <SafeAreaView>
-      <View>
-        <Text className="text-yellow-500">
-          Welcome to my app!
-        </Text>
-      </View>
-    </SafeAreaView>
+    // This page is only used to show a loading indicator when the app is loading
+    <View style={{ flex: 1, justifyContent: "center" }}>
+      <ActivityIndicator size="large" color="#0000ff" />
+    </View>
   );
-}
+};
+export default Index;
