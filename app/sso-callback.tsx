@@ -1,18 +1,20 @@
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
-import { useAuth } from "@clerk/clerk-expo";
+import { useAuth, useOAuth } from "@clerk/clerk-expo";
 
 export default function SSOCallback() {
   const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
+  const { handleOAuthCallback } = useOAuth();
 
   useEffect(() => {
     if (isLoaded) {
+      handleOAuthCallback();
       if (isSignedIn) {
-        router.replace("(auth)/home" as any);
+        router.replace("/(auth)/home");
       } else {
-        router.replace("(public)/Welcome" as any);
+        router.replace("/(public)/Welcome");
       }
     }
   }, [isLoaded, isSignedIn]);
