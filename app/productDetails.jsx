@@ -6,8 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import React from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect } from "react";
+import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 const ProductDetails = () => {
@@ -20,40 +20,53 @@ const ProductDetails = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+    <>
+      <Stack.Screen
+        options={{
+          headerTitle: "Product Details",
+          headerStyle: {
+            backgroundColor: "#6c47ff",
+          },
+          headerTintColor: "#fff",
+          headerBackTitle: "Back",
+        }}
+      />
 
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.price}>₹{formatPrice(item.price)}</Text>
-        </View>
+      <ScrollView style={styles.container}>
+        <Image source={{ uri: item.image }} style={styles.image} />
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.description}>{item.description}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Seller Information</Text>
-          <Text style={styles.sellerName}>{item.seller}</Text>
-          <View style={styles.locationContainer}>
-            <Ionicons name="location" size={16} color="#666" />
-            <Text style={styles.location}>{item.location}</Text>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.price}>₹{formatPrice(item.price)}</Text>
           </View>
-        </View>
 
-        <TouchableOpacity
-          style={styles.contactButton}
-          onPress={() => {
-            // This is where you would implement contacting the seller
-            alert("Contact seller feature coming soon!");
-          }}
-        >
-          <Text style={styles.contactButtonText}>Contact Seller</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Description</Text>
+            <Text style={styles.description}>{item.description}</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Seller Information</Text>
+            <Text style={styles.sellerName}>{item.seller}</Text>
+            <View style={styles.locationContainer}>
+              <Ionicons name="location" size={16} color="#666" />
+              <Text style={styles.location}>{item.location}</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.contactButton}
+            onPress={() => {
+              // This is where you would implement contacting the seller
+              alert("Contact seller feature coming soon!");
+            }}
+          >
+            <Text style={styles.contactButtonText}>Contact Seller</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </>
   );
 };
 

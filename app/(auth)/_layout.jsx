@@ -28,12 +28,16 @@ const TabsPage = () => {
           backgroundColor: "#6c47ff",
         },
         headerTintColor: "#fff",
+
+        tabBarStyle: {
+          backgroundColor: "#fff",
+        },
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
-          headerTitle: "Home",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
@@ -45,7 +49,7 @@ const TabsPage = () => {
       <Tabs.Screen
         name="explore"
         options={{
-          headerTitle: "Explore",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="compass-outline" size={size} color={color} />
           ),
@@ -56,7 +60,7 @@ const TabsPage = () => {
       <Tabs.Screen
         name="addpost"
         options={{
-          headerTitle: "Add",
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="sell" size={24} color={color} />
           ),
@@ -65,9 +69,9 @@ const TabsPage = () => {
         redirect={!isSignedIn}
       />
       <Tabs.Screen
-        name="profile"
+        name="Profile"
         options={{
-          headerTitle: "My Profile",
+          headerShown: true,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),
