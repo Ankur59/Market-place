@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect } from "react";
 import * as WebBrowser from "expo-web-browser";
 import { useOAuth } from "@clerk/clerk-expo";
-import { View, Button, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import { AntDesign } from "@expo/vector-icons";
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
@@ -61,8 +62,61 @@ export default function Page() {
   }, []);
 
   return (
-    <View style={{ width: "100%" }}>
-      <Button title="Sign in with Google" onPress={onPress} color="#6E75F4" />
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.googleButton}
+        onPress={onPress}
+        activeOpacity={0.8}
+      >
+        <View style={styles.iconContainer}>
+          <AntDesign name="google" size={20} color="red" />
+        </View>
+        <Text style={styles.buttonText}>Sign in with Google</Text>
+      </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: "5%",
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    borderRadius: 20,
+  },
+  googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    width: "100%",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    borderWidth: 1,
+    borderColor: "#dadce0",
+  },
+  iconContainer: {
+    marginRight: 12,
+    width: 24,
+    alignItems: "center",
+    borderRadius: 20,
+    backgroundColor: "#f2f2f2",
+    padding: 2,
+  },
+  buttonText: {
+    color: "#3c4043",
+    fontSize: 15,
+    fontWeight: "500",
+    letterSpacing: 0.25,
+  },
+});

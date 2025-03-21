@@ -8,14 +8,21 @@ export default function SSOCallback() {
   const router = useRouter();
   const { handleOAuthCallback } = useOAuth();
 
+  // This use effect is called when there is a change in islaoded and issignedin
+
   useEffect(() => {
+    // if the authentication is completed isloaded will be true the handleOAuthcallback will be called
     if (isLoaded) {
       handleOAuthCallback();
-      if (isSignedIn) {
-        router.replace("/(auth)/home");
-      } else {
-        router.replace("/(public)/Welcome");
-      }
+    }
+
+    // If the user session token is genrated issigned will be true then the user will be redirected to the home screen
+    if (isSignedIn) {
+      router.replace("/(auth)/home");
+    } else {
+      
+      // If no condition matches then it means the session is not created so we can redirect the user to the welcome page which is public
+      router.replace("/(public)/Welcome");
     }
   }, [isLoaded, isSignedIn]);
 

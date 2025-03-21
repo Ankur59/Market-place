@@ -3,19 +3,14 @@ import { Stack } from "expo-router";
 
 const PublicLayout = () => {
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: "#6c47ff",
-        },
-        headerTintColor: "#fff",
-        headerBackTitle: "Back",
-      }}
-    >
+    <Stack>
       <Stack.Screen
         name="login"
         options={{
-          headerTitle: "Clerk Auth App",
+          headerTitle: "Login",
+        }}
+        screenOptions={{
+          headerShown: true,
         }}
       ></Stack.Screen>
       <Stack.Screen

@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable } from "react-native";
 import { useAuth } from "@clerk/clerk-expo";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export const LogoutButton = () => {
   const { signOut } = useAuth();
@@ -37,6 +38,29 @@ const TabsPage = () => {
             <Ionicons name="home-outline" size={size} color={color} />
           ),
           tabBarLabel: "Home",
+        }}
+        redirect={!isSignedIn}
+      />
+
+      <Tabs.Screen
+        name="explore"
+        options={{
+          headerTitle: "Explore",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="compass-outline" size={size} color={color} />
+          ),
+          tabBarLabel: "Explore",
+        }}
+        redirect={!isSignedIn}
+      />
+      <Tabs.Screen
+        name="addpost"
+        options={{
+          headerTitle: "Add",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="sell" size={24} color={color} />
+          ),
+          tabBarLabel: "Sell",
         }}
         redirect={!isSignedIn}
       />

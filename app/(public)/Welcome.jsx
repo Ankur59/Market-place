@@ -49,9 +49,7 @@ const Welcome = () => {
             <Text className="text-[#6E75F4] font-bold">Sign in</Text>
           </TouchableOpacity>
 
-          <View className="w-[70%]">
-            <Loginscreen />
-          </View>
+          <View className="w-[70%]"></View>
         </View>
       </View>
     </View>

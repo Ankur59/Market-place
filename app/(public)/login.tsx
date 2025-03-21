@@ -11,7 +11,7 @@ import {
   Alert,
 } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
-
+import Loginscreen from "@/components/Loginscreen";
 const Login = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
 
@@ -70,6 +70,7 @@ const Login = () => {
           <Text>Create Account</Text>
         </Pressable>
       </Link>
+      <Loginscreen />
     </View>
   );
 };
