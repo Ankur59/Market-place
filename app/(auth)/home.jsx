@@ -11,63 +11,7 @@ import React from "react";
 import { useUser } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-
-const sampleListings = [
-  {
-    id: "1",
-    title: "iPhone 13 Pro",
-    price: 74999,
-    description: "Excellent condition, 256GB storage",
-    image: "https://images.unsplash.com/photo-1632661674596-618d5e97ab56",
-    seller: "Arjun Patel",
-    location: "Mumbai, MH",
-  },
-  {
-    id: "2",
-    title: "MacBook Pro M1",
-    price: 109999,
-    description: "Like new, 512GB SSD, 16GB RAM",
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca4",
-    seller: "Priya Sharma",
-    location: "Bangalore, KA",
-  },
-  {
-    id: "3",
-    title: "Sony PS5",
-    price: 49999,
-    description: "Brand new, sealed in box",
-    image: "https://images.unsplash.com/photo-1606813907291-d86efa9b94db",
-    seller: "Rahul Verma",
-    location: "Delhi, DL",
-  },
-  {
-    id: "4",
-    title: "Nike Air Max",
-    price: 9999,
-    description: "Size 10, worn once",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
-    seller: "Zara Khan",
-    location: "Chennai, TN",
-  },
-  {
-    id: "5",
-    title: "Canon EOS R5",
-    price: 299999,
-    description: "Professional camera, includes 24-70mm lens",
-    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32",
-    seller: "Aditya Menon",
-    location: "Hyderabad, TS",
-  },
-  {
-    id: "6",
-    title: "Samsung 4K TV",
-    price: 64999,
-    description: "65-inch, Smart TV with HDR",
-    image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1",
-    seller: "Meera Iyer",
-    location: "Pune, MH",
-  },
-];
+import sampleListings from "../data/listings";
 
 const ListingCard = ({ item }) => {
   const router = useRouter();
@@ -78,7 +22,7 @@ const ListingCard = ({ item }) => {
 
   const handlePress = () => {
     router.push({
-      pathname: "/(auth)/productDetails",
+      pathname: "/productDetails",
       params: { item: JSON.stringify(item) },
     });
   };
