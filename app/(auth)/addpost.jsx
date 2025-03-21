@@ -56,7 +56,7 @@ const Add = () => {
       setImage(result.assets[0].uri);
     }
   };
-  console.log(supabase);
+
   const image_submit = async (value) => {
     if (!image) {
       return ToastAndroid.show("Image is required", ToastAndroid.SHORT);
