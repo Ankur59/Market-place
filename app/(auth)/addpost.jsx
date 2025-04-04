@@ -10,22 +10,28 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { addDoc, collection, getDocs, getFirestore } from "firebase/firestore";
 import { app } from "../../firebaseconfig";
 import { Formik } from "formik";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import supabase from "../config/supabaseClients";
+import { useUser } from "@clerk/clerk-expo";
 
 const Add = () => {
-  const [categorylist, setCategoryList] = useState([]);
-  const [image, setImage] = useState(null);
-  const db = getFirestore(app);
-  const storage = getStorage();
+  const { user } = useUser();
+
+  const [categorylist, setCategoryList] = useState([]); //State to storeee all the categorynames fetched from fireebase
+  const [Loading, SetLoading] = useState(false);
+
+  const [image, setImage] = useState(null); //State to store the selected image from the user
+  const db = getFirestore(app); //Initialize firestore database
+  const storage = getStorage(); //Initialize Storage
 
   useEffect(() => {
     getCategoryList();
@@ -41,6 +47,7 @@ const Add = () => {
       console.error("Error fetching categories:", error);
     }
   };
+  //Component to open image picker
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -49,24 +56,38 @@ const Add = () => {
       aspect: [4, 3],
       quality: 1,
     });
-
-    // console.log(result);
-
+    //If image is selected successfully then it will be stored to the Image state
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
   };
-
+  // Funtion to clear all the values after form submition
+  //Function to store submit the image and to store it in fibase storage
   const image_submit = async (value) => {
+    SetLoading(true);
     if (!image) {
+      SetLoading(false);
       return ToastAndroid.show("Image is required", ToastAndroid.SHORT);
     } else {
-      value.image = image;
       const response = await fetch(image);
       const image_blob = await response.blob();
       const storageref = ref(storage, "CommunityPost/" + Date.now() + ".jpg");
       uploadBytes(storageref, image_blob)
-        .then(() => console.log("Uploaded a blob or file!"))
+        .then((response) => {
+          getDownloadURL(storageref).then(async (downloadurl) => {
+            value.image = downloadurl;
+            value.useremail = user.primaryEmailAddress.emailAddress;
+            value.username = user.fullName;
+            value.userimage = user.imageUrl;
+            // console.log(value);
+            const docref = await addDoc(collection(db, "UserPosts"), value);
+          });
+        })
+        .then(() => {
+          SetLoading(false);
+          Alert.alert("Post Data Uploaded Successfully");
+          setImage(null);
+        })
         .catch((error) => console.error("Upload failed:", error));
     }
   };
@@ -104,11 +125,18 @@ const Add = () => {
               title: "",
               name: "",
               desc: "",
-              category: "",
+              category: "Furniture",
               address: "",
+              image: "",
+              username: "",
+              useremail: "",
               price: "",
+              userimage: "",
             }}
-            onSubmit={(value) => image_submit(value)}
+            onSubmit={(values, { resetForm }) => {
+              image_submit(values);
+              resetForm();
+            }}
             validate={(values) => {
               const err = {};
               if (
@@ -188,8 +216,13 @@ const Add = () => {
                 <TouchableOpacity
                   style={Styles.submitButton}
                   onPress={handleSubmit}
+                  disabled={Loading}
                 >
-                  <Text style={Styles.submitButtonText}>Submit Listing</Text>
+                  {Loading ? (
+                    <ActivityIndicator color={"white"} />
+                  ) : (
+                    <Text style={Styles.submitButtonText}>Submit Listing</Text>
+                  )}
                 </TouchableOpacity>
               </View>
             )}
