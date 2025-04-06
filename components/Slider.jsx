@@ -12,6 +12,7 @@ const Slider = ({ source }) => {
   //Each time user scrolls the image or it is auto scroll then this use effect will run because any scroll will change the currentIndex
   useEffect(() => {
     //Time interval to do automatic on basis of current index of scrolled value
+    if (source.length === 0) return;
     let interval = setInterval(() => {
       //If the current index is at the last of the image it brings it to the first
       if (currentIndex === source.length - 1) {

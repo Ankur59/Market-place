@@ -9,49 +9,33 @@ import {
 import React, { useEffect } from "react";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useRoute } from "@react-navigation/native";
 
 const ProductDetails = () => {
-  const router = useRouter();
-  const params = useLocalSearchParams();
-  const item = JSON.parse(params.item);
-
-  const formatPrice = (price) => {
-    return price.toLocaleString("en-IN");
-  };
-
+  const route = useRoute();
+  const { item } = route.params;
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerTitle: "Product Details",
-          headerStyle: {
-            backgroundColor: "#6c47ff",
-          },
-          headerTintColor: "#fff",
-          headerBackTitle: "Back",
-        }}
-      />
-
       <ScrollView style={styles.container}>
         <Image source={{ uri: item.image }} style={styles.image} />
 
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.price}>₹{formatPrice(item.price)}</Text>
+            <Text style={styles.price}>₹{item.price}</Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.description}>{item.description}</Text>
+            <Text style={styles.description}>{item.desc}</Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Seller Information</Text>
-            <Text style={styles.sellerName}>{item.seller}</Text>
+            <Text style={styles.sellerName}>{item.username}</Text>
             <View style={styles.locationContainer}>
               <Ionicons name="location" size={16} color="#666" />
-              <Text style={styles.location}>{item.location}</Text>
+              <Text style={styles.location}>{item.address}</Text>
             </View>
           </View>
 

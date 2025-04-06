@@ -6,13 +6,16 @@ import { collection, getDocs, getFirestore } from "firebase/firestore";
 import { app } from "../../firebaseconfig";
 import Category from "../../components/Categories";
 import LatestItems from "../../components/LatestItems";
+import { useAuth } from "../../Context/DataContext";
 
 const Home = () => {
+  // Get functions and States from global context api
+  const { Posts, GetPostsData, GetCategoryData, Categories } = useAuth();
   const db = getFirestore(app);
+  // For storing Slider Image data
   const [Slider_Img, SetSlider_Img] = useState([]);
-  const [Categories, setCategories] = useState([]);
-  const [posts, setposts] = useState([]);
 
+  // Fetching Slider Images from Firebase
   const getsliderimage = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "Sliders"));
@@ -23,40 +26,17 @@ const Home = () => {
       console.error("Error fetching categories:", error);
     }
   };
-
-  const getcategoryimage = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "Categories"));
-      const categories = querySnapshot.docs.map((doc) => doc.data());
-
-      setCategories(categories); // Update state once, after collecting all data
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
-  const getProductDetails = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "UserPosts"));
-      const posts = querySnapshot.docs.map((item) => item.data());
-      setposts(posts);
-    } catch (error) {
-      console.log("Error fetching Posts:", error);
-    }
-  };
   useEffect(() => {
     getsliderimage();
-    getcategoryimage();
-    getProductDetails();
+    GetPostsData();
+    GetCategoryData();
   }, []);
-
-  console.log(posts);
   return (
     <ScrollView>
       <ProfileHeader />
       <Slider source={Slider_Img} />
       <Category source={Categories} />
-      <LatestItems source={posts} />
+      <LatestItems source={Posts} />
     </ScrollView>
   );
 };

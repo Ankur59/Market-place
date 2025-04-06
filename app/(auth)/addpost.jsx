@@ -39,7 +39,7 @@ const Add = () => {
 
   const getCategoryList = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "Market-Place"));
+      const querySnapshot = await getDocs(collection(db, "Categories"));
       const categories = querySnapshot.docs.map((doc) => doc.data());
 
       setCategoryList(categories); // Update state once, after collecting all data
@@ -191,8 +191,8 @@ const Add = () => {
                         return (
                           <Picker.Item
                             key={index}
-                            value={Item.name}
-                            label={Item.name}
+                            value={Item.Name}
+                            label={Item.Name}
                           />
                         );
                       })}

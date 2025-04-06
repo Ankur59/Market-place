@@ -1,8 +1,10 @@
-import { View, Text, FlatList, Image } from "react-native";
+import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import { hp, wp } from "../common/helper";
+import { useNavigation } from "@react-navigation/native";
 
 const Category = ({ source }) => {
+  const navigation = useNavigation();
   return (
     <View
       style={{
@@ -21,7 +23,7 @@ const Category = ({ source }) => {
         showsHorizontalScrollIndicator={false}
         renderItem={({ item, index }) => {
           return (
-            <View
+            <TouchableOpacity
               style={{
                 backgroundColor: "rd",
                 justifyContent: "space-around",
@@ -30,13 +32,16 @@ const Category = ({ source }) => {
                 justifyContent: "center",
                 width: wp(17),
               }}
+              onPress={() =>
+                navigation.navigate('CategoryPage', { category: item })
+              }
             >
               <Image
                 source={{ uri: item.Image }}
                 style={{ height: hp(6), width: hp(6), borderRadius: 100 }}
               />
               {/* <Text>{item.Name}</Text> */}
-            </View>
+            </TouchableOpacity>
           );
         }}
       />

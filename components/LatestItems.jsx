@@ -2,8 +2,11 @@ import { View, Text, Image } from "react-native";
 import React from "react";
 import { FlatList } from "react-native";
 import { hp, wp } from "../common/helper";
+import ProductCard from "./Card";
+import { useNavigation } from "@react-navigation/native";
 
 const LatestItems = ({ source }) => {
+  const navigation = useNavigation();
   return (
     <View
       style={{
@@ -18,34 +21,12 @@ const LatestItems = ({ source }) => {
         data={source}
         renderItem={({ item, index }) => {
           return (
-            <View
-              style={{
-                backgroundColor: "re",
-                marginVertical: hp(2),
-                marginVertical: wp(2),
-                marginHorizontal: hp(2),
-              }}
-            >
-              <View style={{ backgroundColor: "yellw" }}>
-                <Image
-                  source={{ uri: item.image }}
-                  style={{
-                    height: hp(15),
-                    width: wp(40),
-                    borderRadius: 10,
-                  }}
-                />
-              </View>
-              <View style={{}}>
-                <Text style={{ fontSize: 15, fontWeight: 600 }}>
-                  {item.title}
-                </Text>
-                <Text style={{ fontSize: 15, fontWeight: 600, color: "grey" }}>
-                  {" "}
-                  ₹{item.price}
-                </Text>
-              </View>
-            </View>
+            <ProductCard
+              imageUrl={item.image}
+              name={item.name}
+              price={item.price}
+              action={() => navigation.navigate("productDetails", { item })}
+            />
           );
         }}
       />

@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import React from "react";
 import { useUser } from "@clerk/clerk-expo";
+import { hp } from "../../common/helper";
 
 const Profile = () => {
   const { user } = useUser();
@@ -14,11 +15,16 @@ const Profile = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <Text style={styles.avatarText}>
-            {getInitials(user?.firstName, user?.lastName)}
-          </Text>
-        </View>
+        {/* <View style={styles.avatarContainer}> */}
+          <Image
+            source={{ uri: user?.imageUrl }}
+            style={{
+              height: hp(11),
+              width: hp(11),
+              borderRadius: 100,
+            }}
+          />
+        {/* </View> */}
         <Text style={styles.name}>{user?.fullName}</Text>
         <Text style={styles.email}>{user?.emailAddresses[0].emailAddress}</Text>
       </View>
