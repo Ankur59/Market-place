@@ -7,13 +7,59 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useEffect } from "react";
-import { useLocalSearchParams, useRouter, Stack } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import * as Sharing from "expo-sharing";
+
+import * as FileSystem from "expo-file-system";
 
 const ProductDetails = () => {
+  const navigation = useNavigation();
   const route = useRoute();
   const { item } = route.params;
+
+  useEffect(() => {
+    setHeaderShareButton();
+  }, [navigation]);
+
+  const Customshare = async () => {
+    const fileUri = FileSystem.documentDirectory + "shared.jpg";
+
+    try {
+      const downloadResumable = FileSystem.createDownloadResumable(
+        item.image,
+        fileUri
+      );
+      const { uri } = await downloadResumable.downloadAsync();
+
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (!isAvailable) {
+        alert("Sharing is not available on this device");
+        return;
+      }
+
+      await Sharing.shareAsync(uri);
+    } catch (error) {
+      console.log("Sharing error:", error);
+    }
+  };
+
+  const setHeaderShareButton = () => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity onPress={Customshare}>
+          <Feather
+            name="share-2"
+            size={24}
+            color="black"
+            style={{ marginRight: 15 }}
+          />
+        </TouchableOpacity>
+      ),
+    });
+  };
+
   return (
     <>
       <ScrollView style={styles.container}>
@@ -42,7 +88,6 @@ const ProductDetails = () => {
           <TouchableOpacity
             style={styles.contactButton}
             onPress={() => {
-              // This is where you would implement contacting the seller
               alert("Contact seller feature coming soon!");
             }}
           >
@@ -53,6 +98,8 @@ const ProductDetails = () => {
     </>
   );
 };
+
+export default ProductDetails;
 
 const styles = StyleSheet.create({
   container: {
@@ -122,4 +169,24 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProductDetails;
+// const customShare = async () => {
+//   const canShare = await Sharing.isAvailableAsync();
+//   if (!canShare) {
+//     alert("Sharing is not available on this device");
+//     return;
+//   }
+
+//   try {
+//     const fileUri = FileSystem.documentDirectory + "shared-image.jpg";
+
+//     const downloadResumable = FileSystem.createDownloadResumable(
+//       item.image,
+//       fileUri
+//     );
+
+//     const { uri } = await downloadResumable.downloadAsync();
+//     await Sharing.shareAsync(uri);
+//   } catch (error) {
+//     console.log("Error sharing file:", error);
+//   }
+// };

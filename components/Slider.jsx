@@ -29,7 +29,7 @@ const Slider = ({ source }) => {
       }
     }, 3000);
     return () => clearInterval(interval);
-  }, [currentIndex]);
+  }, [currentIndex, source]);
 
   // Funtion to give context to flatlist about the current image size
   const getitemLayout = (item, index) => ({
