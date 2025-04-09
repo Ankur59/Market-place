@@ -19,7 +19,7 @@ export default function SSOCallback() {
     // If the user session token is genrated issigned will be true then the user will be redirected to the home screen
     if (isSignedIn) {
       router.replace("/(auth)/home");
-    } else {
+    } else {  
       
       // If no condition matches then it means the session is not created so we can redirect the user to the welcome page which is public
       router.replace("/(public)/Welcome");

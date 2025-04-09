@@ -5,14 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Share,
 } from "react-native";
 import React, { useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import * as Sharing from "expo-sharing";
-
-import * as FileSystem from "expo-file-system";
 
 const ProductDetails = () => {
   const navigation = useNavigation();
@@ -24,27 +22,11 @@ const ProductDetails = () => {
   }, [navigation]);
 
   const Customshare = async () => {
-    const fileUri = FileSystem.documentDirectory + "shared.jpg";
-
-    try {
-      const downloadResumable = FileSystem.createDownloadResumable(
-        item.image,
-        fileUri
-      );
-      const { uri } = await downloadResumable.downloadAsync();
-
-      const isAvailable = await Sharing.isAvailableAsync();
-      if (!isAvailable) {
-        alert("Sharing is not available on this device");
-        return;
-      }
-
-      await Sharing.shareAsync(uri);
-    } catch (error) {
-      console.log("Sharing error:", error);
-    }
+    content = {
+      message: `Take a look at this amazing product ${item.name} i found at havensmart ${item.desc}`,
+    };
+    Share.share(content);
   };
-
   const setHeaderShareButton = () => {
     navigation.setOptions({
       headerRight: () => (
