@@ -1,48 +1,47 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-expo";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  getFirestore,
-  setDoc,
-} from "firebase/firestore";
-import { app, db } from "../firebaseconfig";
+import { doc, getDoc, setDoc, getFirestore } from "firebase/firestore";
+import { app } from "../firebaseconfig";
+import { Redirect } from "expo-router";
 
 export default function SyncUserToFirestore() {
   const { user, isLoaded } = useUser();
+  const [role, setRole] = useState("");
   const db = getFirestore(app);
-  const [userdata, setuserdata] = useState();
 
   useEffect(() => {
-    const sync = async () => {
-      if (!isLoaded || !user) {
-        console.log("returned");
-        return;
-      }
+    console.log(role);
+  }, [role]);
+  useEffect(() => {
+    const syncAndFetch = async () => {
+      if (!isLoaded || !user) return;
 
       const userId = user.id.toString();
+      const userRef = doc(db, "users", userId);
+
       try {
-        const userRef = doc(db, "users", userId);
-
         const docSnap = await getDoc(userRef);
-
         if (!docSnap.exists()) {
           await setDoc(userRef, {
             name: user.fullName,
             email: user.primaryEmailAddress.emailAddress,
             role: "user",
           });
+          setRole("user");
+        } else {
+          const data = docSnap.data();
+          setRole(data.role);
         }
       } catch (error) {
-        console.error("❌ Error in Firestore access:", error);
+        console.error("❌ Firestore error:", error);
       }
     };
-
-    sync();
-
+    syncAndFetch();
   }, [user, isLoaded]);
 
-  return null; // ✅ This component only runs logic; doesn't render anything
+  // 🔁 Redirect based on role
+  if (role === "admin") return <Redirect href="../(admin)" />;
+  if (role === "user") return <Redirect href="../(auth)/home" />;
+
+  return null;
 }

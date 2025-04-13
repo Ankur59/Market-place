@@ -1,6 +1,6 @@
-import { useSignIn } from "@clerk/clerk-expo";
+import { useSignIn, useUser } from "@clerk/clerk-expo";
 import { Link } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -12,32 +12,56 @@ import {
 } from "react-native";
 import Spinner from "react-native-loading-spinner-overlay";
 import Loginscreen from "@/components/Loginscreen";
+
 const Login = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
+  const { user } = useUser();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
+  const [shouldUpdateUsername, setShouldUpdateUsername] = useState(false);
 
   const onSignInPress = async () => {
-    if (!isLoaded) {
-      return;
-    }
+    if (!isLoaded) return;
     setLoading(true);
+
     try {
       const completeSignIn = await signIn.create({
         identifier: emailAddress,
         password,
       });
 
-      // This indicates the user is signed in
       await setActive({ session: completeSignIn.createdSessionId });
+
+      // Trigger username update once user is active
+      setShouldUpdateUsername(true);
     } catch (err: any) {
-      alert(err.errors[0].message);
+      alert(err.errors[0]?.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const updateUsername = async () => {
+      if (shouldUpdateUsername && user) {
+        try {
+          await user.update({ username });
+        } catch (err: any) {
+          Alert.alert(
+            "Username Update Failed",
+            err.errors?.[0]?.message || "Unknown error"
+          );
+        } finally {
+          setShouldUpdateUsername(false);
+        }
+      }
+    };
+
+    updateUsername();
+  }, [shouldUpdateUsername, user]);
 
   return (
     <View style={styles.container}>
@@ -45,20 +69,27 @@ const Login = () => {
 
       <TextInput
         autoCapitalize="none"
-        placeholder="test@test.com"
+        placeholder="Email (e.g. test@test.com)"
         value={emailAddress}
         onChangeText={setEmailAddress}
         style={styles.inputField}
       />
       <TextInput
-        placeholder="test123"
+        placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         style={styles.inputField}
       />
+      <TextInput
+        autoCapitalize="none"
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
+        style={styles.inputField}
+      />
 
-      <Button onPress={onSignInPress} title="Login" color={"#6c47ff"}></Button>
+      <Button onPress={onSignInPress} title="Login" color={"#6c47ff"} />
 
       <Link href="../reset" asChild>
         <Pressable style={styles.button}>
@@ -70,6 +101,7 @@ const Login = () => {
           <Text>Create Account</Text>
         </Pressable>
       </Link>
+
       <Loginscreen />
     </View>
   );

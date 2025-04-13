@@ -9,7 +9,7 @@ export const ContextProvider = ({ children }) => {
     const [Posts, SetPosts] = useState([])
     const [Categories, SetCategories] = useState([])
     const db = getFirestore(app);
-  const { user } = useUser();
+    const { user } = useUser();
 
     // Funtion that fetches the post data from the firebase
     const GetPostsData = async () => {

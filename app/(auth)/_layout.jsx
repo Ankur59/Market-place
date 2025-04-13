@@ -23,6 +23,7 @@
 
     return (
       <Tabs
+      initialRouteName="Profile"
         screenOptions={{
           headerStyle: {
             backgroundColor: "#6c47ff",

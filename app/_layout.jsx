@@ -7,6 +7,7 @@ import { ContextProvider } from "../Context/DataContext";
 import SyncUserToFirestore from "../components/Syncwithfirebase";
 import { useUserRole, UserRoleProvider } from "../Context/RoleContext";
 import { useEffect } from "react";
+import { ThemeProvider } from "../Context/ThemeContext";
 
 const publishableKey =
   "pk_test_ZXZvbHZlZC1maXJlZmx5LTUxLmNsZXJrLmFjY291bnRzLmRldiQ";
@@ -41,8 +42,6 @@ function AppContent() {
 
       <SignedIn>
         <SyncUserToFirestore />
-        {userData?.role === "admin" && <Redirect href="../(admin)/" />}
-        {userData?.role != "admin" && <Redirect href="../(auth)/home" />}
       </SignedIn>
       <SignedOut>
         <Redirect href="../(public)/Welcome" />
@@ -56,7 +55,9 @@ export default function RootLayout() {
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <UserRoleProvider>
         <ContextProvider>
-          <AppContent />
+          <ThemeProvider>
+            <AppContent />
+          </ThemeProvider>
         </ContextProvider>
       </UserRoleProvider>
     </ClerkProvider>

@@ -1,103 +1,44 @@
-import { View, Text, StyleSheet, Image } from "react-native";
-import React from "react";
-import { useUser } from "@clerk/clerk-expo";
-import { hp } from "../../common/helper";
+import { View, Text, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import ProfileHeader from "../../components/ProfileHeader";
+import Slider from "../../components/Slider";
+import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { app } from "../../firebaseconfig";
+import Category from "../../components/Categories";
+import LatestItems from "../../components/LatestItems";
+import { useAuth } from "../../Context/DataContext";
 
-const Profile = () => {
-  const { user } = useUser();
+const Home = () => {
+  // Get functions and States from global context api
+  const { Posts, GetPostsData, GetCategoryData, Categories } = useAuth();
+  const db = getFirestore(app);
+  // For storing Slider Image data
+  const [Slider_Img, SetSlider_Img] = useState([]);
 
-  const getInitials = (firstName, lastName) => {
-    const firstInitial = firstName ? firstName[0] : "";
-    const lastInitial = lastName ? lastName[0] : "";
-    return (firstInitial + lastInitial).toUpperCase();
+  // Fetching Slider Images from Firebase
+  const getsliderimage = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "Sliders"));
+      const Slider = querySnapshot.docs.map((doc) => doc.data());
+
+      SetSlider_Img(Slider); // Update state once, after collecting all data
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
   };
-
+  useEffect(() => {
+    getsliderimage();
+    GetPostsData();
+    GetCategoryData();
+  }, []);
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        {/* <View style={styles.avatarContainer}> */}
-          <Image
-            source={{ uri: user?.imageUrl }}
-            style={{
-              height: hp(11),
-              width: hp(11),
-              borderRadius: 100,
-            }}
-          />
-        {/* </View> */}
-        <Text style={styles.name}>{user?.fullName}</Text>
-        <Text style={styles.email}>{user?.emailAddresses[0].emailAddress}</Text>
-      </View>
-
-      <View style={styles.infoSection}>
-        <View style={styles.infoItem}>
-          <Text style={styles.label}>Username</Text>
-          <Text style={styles.value}>{user?.username || "Not set"}</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Text style={styles.label}>First Name</Text>
-          <Text style={styles.value}>{user?.firstName || "Not set"}</Text>
-        </View>
-        <View style={styles.infoItem}>
-          <Text style={styles.label}>Last Name</Text>
-          <Text style={styles.value}>{user?.lastName || "Not set"}</Text>
-        </View>
-      </View>
-    </View>
+    <ScrollView>
+      <ProfileHeader />
+      <Slider source={Slider_Img} />
+      <Category source={Categories} />
+      <LatestItems source={Posts} />
+    </ScrollView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  header: {
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "#f5f5f5",
-  },
-  avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#6c47ff",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  avatarText: {
-    color: "#fff",
-    fontSize: 36,
-    fontWeight: "bold",
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  email: {
-    fontSize: 16,
-    color: "#666",
-  },
-  infoSection: {
-    padding: 20,
-  },
-  infoItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  label: {
-    fontSize: 16,
-    color: "#666",
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-});
-
-export default Profile;
+export default Home;
