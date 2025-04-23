@@ -24,9 +24,9 @@ function AppContent() {
     fetchUserData();
   }, []);
 
-  useEffect(() => {
-    console.log(userData);
-  }, [userData]);
+  // useEffect(() => {
+  //   console.log(userData);
+  // }, [userData]);
 
   return (
     <>

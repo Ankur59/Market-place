@@ -40,7 +40,6 @@ export const ThemeProvider = ({ children }) => {
 
     const getOppositeColor = (colorShades, darkKey = "eerieBlack", lightKey = "ghostWhite") => {
         if (Theme === "dark") {
-            console.log(colorShades.whiteShades[lightKey])
             return colorShades.whiteShades[lightKey];
         } else if (Theme === "light") {
             return colorShades.blackShades[darkKey];

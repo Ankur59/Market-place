@@ -22,6 +22,7 @@ import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useUser } from "@clerk/clerk-expo";
+import { v4 as uuidv4 } from "uuid";
 
 const Add = () => {
   const { user } = useUser();
@@ -61,34 +62,43 @@ const Add = () => {
       setImage(result.assets[0].uri);
     }
   };
-  // Funtion to clear all the values after form submition
-  //Function to store submit the image and to store it in fibase storage
+
   const image_submit = async (value) => {
     SetLoading(true);
     if (!image) {
       SetLoading(false);
       return ToastAndroid.show("Image is required", ToastAndroid.SHORT);
-    } else {
+    }
+
+    try {
       const response = await fetch(image);
       const image_blob = await response.blob();
       const storageref = ref(storage, "CommunityPost/" + Date.now() + ".jpg");
-      uploadBytes(storageref, image_blob)
-        .then((response) => {
-          getDownloadURL(storageref).then(async (downloadurl) => {
-            value.image = downloadurl;
-            value.useremail = user.primaryEmailAddress.emailAddress;
-            value.username = user.fullName;
-            value.userimage = user.imageUrl;
-            // console.log(value);
-            const docref = await addDoc(collection(db, "UserPosts"), value);
-          });
-        })
-        .then(() => {
-          SetLoading(false);
-          Alert.alert("Post Data Uploaded Successfully");
-          setImage(null);
-        })
-        .catch((error) => console.error("Upload failed:", error));
+
+      // Upload the image
+      await uploadBytes(storageref, image_blob);
+
+      // Get the download URL
+      const downloadurl = await getDownloadURL(storageref);
+
+      // Prepare the document data
+      value.image = downloadurl;
+      value.useremail = user.primaryEmailAddress.emailAddress;
+      value.username = user.fullName;
+      value.userimage = user.imageUrl;
+      value.customId = Date.now().toString();
+
+      // Add document to Firestore
+      const docref = await addDoc(collection(db, "UserPosts"), value);
+
+      // Success!
+      SetLoading(false);
+      Alert.alert("Post Data Uploaded Successfully");
+      setImage(null);
+    } catch (error) {
+      console.error("Error:", error);
+      SetLoading(false);
+      Alert.alert("Upload failed", error.message);
     }
   };
   return (
@@ -124,6 +134,7 @@ const Add = () => {
             initialValues={{
               title: "",
               name: "",
+              id: "",
               desc: "",
               category: "Furniture",
               address: "",

@@ -2,11 +2,21 @@ import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { hp, wp } from "../common/helper";
 import { useNavigation } from "@react-navigation/native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { EvilIcons, FontAwesome5 } from "@expo/vector-icons";
 
-const ProductCard = ({ name, price, imageUrl, action }) => {
-  const navigation = useNavigation();
+const ProductCard = ({
+  name,
+  price,
+  imageUrl,
+  action,
+  condition,
+  Ondelete,
+  onEdit,
+}) => {
+  const Wrapper = condition ? View : TouchableOpacity;
   return (
-    <TouchableOpacity style={styles.card} onPress={action}>
+    <Wrapper style={styles.card} onPress={action}>
       {/* Product Image */}
       <View style={styles.imageContainer}>
         <Image
@@ -14,6 +24,47 @@ const ProductCard = ({ name, price, imageUrl, action }) => {
           style={styles.image}
           resizeMode="cover"
         />
+        {condition ? (
+          <View
+            style={{
+              maxWidth: "150",
+              maxHeight: "100",
+              borderRadius: 100,
+              position: "absolute",
+              right: 9,
+              top: 5,
+              flexDirection: "row",
+              gap: 10,
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                backgroundColor: "white",
+                padding: 2,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 100,
+              }}
+              onPress={Ondelete}
+            >
+              <MaterialIcons name="delete" size={19} color="red" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "white",
+                padding: 2,
+                height: 30,
+                width: 30,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 100,
+              }}
+              onPress={onEdit}
+            >
+              <FontAwesome5 name="pencil-alt" size={15} color="black" />
+            </TouchableOpacity>
+          </View>
+        ) : null}
       </View>
 
       {/* Product Info */}
@@ -23,7 +74,7 @@ const ProductCard = ({ name, price, imageUrl, action }) => {
         </Text>
         <Text style={styles.price}>₹{price}</Text>
       </View>
-    </TouchableOpacity>
+    </Wrapper>
   );
 };
 

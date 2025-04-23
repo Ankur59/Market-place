@@ -1,9 +1,22 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+  FlatList,
+} from "react-native";
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  getFirestore,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import { getStorage, ref, deleteObject } from "firebase/storage";
 import { app } from "../firebaseconfig";
 import { useUser } from "@clerk/clerk-expo";
-import { FlatList } from "react-native";
 import ProductCard from "../components/Card";
 
 const Myproducts = () => {
@@ -12,16 +25,21 @@ const Myproducts = () => {
   const db = getFirestore(app);
   const { user } = useUser();
 
-  useEffect(() => {
-    GetPostsData();
-  }, []);
+  const getPathFromURL = (url) => {
+    const decodedUrl = decodeURIComponent(url);
+    const match = decodedUrl.match(/\/o\/(.*?)\?/);
+    return match ? match[1] : null;
+  };
 
   const GetPostsData = async () => {
     setLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, "UserPosts"));
       const data = querySnapshot.docs
-        .map((item) => item.data())
+        .map((docSnap) => ({
+          ...docSnap.data(),
+          docId: docSnap.id, // ✅ include the document ID
+        }))
         .filter(
           (item) => item.useremail === user.primaryEmailAddress.emailAddress
         );
@@ -33,6 +51,51 @@ const Myproducts = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    GetPostsData();
+  }, []);
+
+  const handledelete = async (item) => {
+    Alert.alert(
+      "Delete Post",
+      "Are you sure you want to delete this post?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Delete Firestore document
+              const docRef = doc(db, "UserPosts", item.docId);
+              await deleteDoc(docRef);
+
+              // Delete the image from storage
+              const imagePath = getPathFromURL(item.image);
+              if (imagePath) {
+                const storage = getStorage();
+                const imageRef = ref(storage, imagePath);
+                await deleteObject(imageRef);
+              }
+
+              // Refresh data
+              GetPostsData();
+              console.log("Post and image deleted");
+            } catch (error) {
+              console.error("Error deleting post or image:", error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const CheckOwner = (email) => {
+    return user?.primaryEmailAddress?.emailAddress === email;
+  };
+
   return (
     <View>
       {Loading ? (
@@ -51,16 +114,16 @@ const Myproducts = () => {
           <FlatList
             numColumns={2}
             data={MyProducts}
-            renderItem={({ item, index }) => {
-              return (
-                <ProductCard
-                  imageUrl={item.image}
-                  name={item.name}
-                  price={item.price}
-                //   action={() => navigation.navigate("productDetails", { item })}
-                />
-              );
-            }}
+            keyExtractor={(item) => item.customId}
+            renderItem={({ item }) => (
+              <ProductCard
+                imageUrl={item.image}
+                name={item.name}
+                price={item.price}
+                condition={CheckOwner(item.useremail)}
+                Ondelete={() => handledelete(item)} // ✅ Pass item
+              />
+            )}
           />
         </View>
       )}
