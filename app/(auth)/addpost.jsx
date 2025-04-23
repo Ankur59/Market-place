@@ -134,7 +134,6 @@ const Add = () => {
             initialValues={{
               title: "",
               name: "",
-              id: "",
               desc: "",
               category: "Furniture",
               address: "",

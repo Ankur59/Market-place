@@ -13,17 +13,61 @@ import {
   getFirestore,
   deleteDoc,
   doc,
+  updateDoc,
 } from "firebase/firestore";
 import { getStorage, ref, deleteObject } from "firebase/storage";
 import { app } from "../firebaseconfig";
 import { useUser } from "@clerk/clerk-expo";
 import ProductCard from "../components/Card";
+import EditModal from "../components/Modal/EditModal";
 
 const Myproducts = () => {
   const [MyProducts, SetMyProducts] = useState([]);
   const [Loading, setLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [Data, setData] = useState({});
   const db = getFirestore(app);
   const { user } = useUser();
+
+  const handleEdit = (item) => {
+    setData({
+      desc: item.desc,
+      name: item.name,
+      price: item.price,
+    });
+    setModalVisible(true);
+    return Data;
+  };
+
+  const handleSubmit = async (item) => {
+    Alert.alert(
+      "Delete Post",
+      "Are you sure you want to save the changes ?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Update",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const docRef = doc(db, "UserPosts", item.docId);
+              await updateDoc(docRef, {
+                name: Data.name,
+                desc: Data.desc,
+                price: Data.price,
+              });
+              console.log("Document successfully updated!");
+              setModalVisible(false);
+              GetPostsData(); // refresh the list
+            } catch (error) {
+              console.error("Error updating document: ", error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const getPathFromURL = (url) => {
     const decodedUrl = decodeURIComponent(url);
@@ -116,13 +160,23 @@ const Myproducts = () => {
             data={MyProducts}
             keyExtractor={(item) => item.customId}
             renderItem={({ item }) => (
-              <ProductCard
-                imageUrl={item.image}
-                name={item.name}
-                price={item.price}
-                condition={CheckOwner(item.useremail)}
-                Ondelete={() => handledelete(item)} // ✅ Pass item
-              />
+              <View>
+                <ProductCard
+                  imageUrl={item.image}
+                  name={item.name}
+                  price={item.price}
+                  condition={CheckOwner(item.useremail)}
+                  Ondelete={() => handledelete(item)}
+                  onEdit={() => handleEdit(item)}
+                />
+                <EditModal
+                  modalVisible={modalVisible}
+                  setModalVisible={setModalVisible}
+                  item={Data}
+                  setitem={setData}
+                  onsubmit={() => handleSubmit(item)}
+                />
+              </View>
             )}
           />
         </View>
