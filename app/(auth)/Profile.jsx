@@ -162,6 +162,17 @@ const Profile = () => {
         }
         text={"My Orders"}
       />
+      <ProfileCards
+        icons={
+          <Entypo
+            name="chat"
+            size={24}
+            color={getOppositeColor(colorShades, "jet", "white")}
+          />
+        }
+        text={"My Chats"}
+        action={() => redir("/ChatList")}
+      />
     </View>
   );
 };

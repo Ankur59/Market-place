@@ -89,7 +89,9 @@ const ProductDetails = () => {
 
           <TouchableOpacity
             style={styles.contactButton}
-            onPress={() => alert("Contact seller feature coming soon!")}
+            onPress={() =>
+              navigation.navigate("ChatScreen", { SellerId: item.useremail })
+            }
           >
             <Text style={styles.contactButtonText}>Contact Seller</Text>
           </TouchableOpacity>
