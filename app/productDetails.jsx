@@ -8,107 +8,96 @@ import {
   Share,
   ActivityIndicator,
 } from "react-native";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import { isLoading } from "expo-font";
 
 const ProductDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { item } = route.params;
 
-  // Store the message in state so it's accessible throughout the component
+  // State to store share message and loading state
   const [shareMessage, setShareMessage] = useState("");
-  const [Loading, SetisLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // Generate the share message when the component mounts
   useEffect(() => {
-    // Create the share message once when component mounts
-    const msg = `Take a look at this amazing product ${item.name} i found at havensmart ${item.desc}`;
+    const msg = `Take a look at this amazing product ${item.name} I found at Havensmart: ${item.desc}`;
     setShareMessage(msg);
-  }, [item]);
+  }, []);
 
-  // Make this a useCallback to prevent unnecessary re-renders
-  const Customshare = useCallback(async () => {
+  // Share function triggered when the share button is clicked
+  const Customshare = async () => {
+    if (!shareMessage.trim()) {
+      alert("Message not ready to share.");
+      return;
+    }
+
     try {
-      SetisLoading(true);
-      const content = {
-        message: shareMessage,
-      };
-      await Share.share(content);
+      setLoading(true); // Show loading spinner
+      await Share.share({ message: shareMessage });
     } catch (error) {
+      alert("Something went wrong while sharing.");
       console.error("Error sharing:", error);
     } finally {
-      SetisLoading(false); // Ensure it runs no matter what
+      setLoading(false); // Hide loading spinner after share
     }
-  }, [shareMessage]);
-
-  // Set up the header button only once or when dependencies change
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={Customshare}
-          // Add hit slop to increase touchable area
-          hitSlop={{ top: 15, bottom: 15, left: 55, right: 30 }}
-        >
-          <Feather
-            name="share-2"
-            size={24}
-            color="black"
-            style={{ marginRight: 15 }}
-          />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation, Customshare]);
-
-  // Rest of your component...
+  };
   return (
     <>
-      {Loading ? (
-        <ActivityIndicator />
-      ) : (
-        <ScrollView style={styles.container}>
+      <ScrollView style={styles.container}>
+        <View>
           <Image source={{ uri: item.image }} style={styles.image} />
-
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.price}>₹{item.price}</Text>
-            </View>
-
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Description</Text>
-              <Text style={styles.description}>{item.desc}</Text>
-            </View>
-
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Seller Information</Text>
-              <Text style={styles.sellerName}>{item.username}</Text>
-              <View style={styles.locationContainer}>
-                <Ionicons name="location" size={16} color="#666" />
-                <Text style={styles.location}>{item.address}</Text>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={styles.contactButton}
-              onPress={() => {
-                alert("Contact seller feature coming soon!");
-              }}
-            >
-              <Text style={styles.contactButtonText}>Contact Seller</Text>
+          <View
+            style={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              backgroundColor: "white",
+              padding: 5,
+              borderRadius: 100,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <TouchableOpacity onPress={Customshare} disabled={loading}>
+              <Feather name="share-2" size={24} color="black" />
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      )}
+        </View>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.price}>₹{item.price}</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Description</Text>
+            <Text style={styles.description}>{item.desc}</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Seller Information</Text>
+            <Text style={styles.sellerName}>{item.username}</Text>
+            <View style={styles.locationContainer}>
+              <Ionicons name="location" size={16} color="#666" />
+              <Text style={styles.location}>{item.address}</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.contactButton}
+            onPress={() => alert("Contact seller feature coming soon!")}
+          >
+            <Text style={styles.contactButtonText}>Contact Seller</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </>
   );
 };
-
-export default ProductDetails;
 
 const styles = StyleSheet.create({
   container: {
@@ -178,24 +167,4 @@ const styles = StyleSheet.create({
   },
 });
 
-// const customShare = async () => {
-//   const canShare = await Sharing.isAvailableAsync();
-//   if (!canShare) {
-//     alert("Sharing is not available on this device");
-//     return;
-//   }
-
-//   try {
-//     const fileUri = FileSystem.documentDirectory + "shared-image.jpg";
-
-//     const downloadResumable = FileSystem.createDownloadResumable(
-//       item.image,
-//       fileUri
-//     );
-
-//     const { uri } = await downloadResumable.downloadAsync();
-//     await Sharing.shareAsync(uri);
-//   } catch (error) {
-//     console.log("Error sharing file:", error);
-//   }
-// };
+export default ProductDetails;

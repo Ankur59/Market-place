@@ -34,7 +34,6 @@
       "expo-router",
       [
         "expo-splash-screen",
-        
         {
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
@@ -57,7 +56,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "509bc83f-1c75-490a-b16a-89ec035dcb5b"
+        "projectId": "7bac804d-0376-427e-9365-ea39466e95fb"
       }
     }
   }

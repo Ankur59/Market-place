@@ -9,41 +9,35 @@ const Register = () => {
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState(""); // <-- New state for username
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Create the user and send the verification email
   const onSignUpPress = async () => {
-    if (!isLoaded) {
-      return;
-    }
+    if (!isLoaded) return;
     setLoading(true);
 
     try {
-      // Create the user on Clerk
       await signUp.create({
         emailAddress,
         password,
+        firstName: username,
       });
 
-      // Send verification Email
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
 
-      // change the UI to verify the email address
       setPendingVerification(true);
     } catch (err: any) {
-      alert(err.errors[0].message);
+      console.error(err); // This will show the full error in your console
+      alert(err.message || JSON.stringify(err)); // This will show a more useful error message
     } finally {
       setLoading(false);
     }
   };
 
-  // Verify the email address
   const onPressVerify = async () => {
-    if (!isLoaded) {
-      return;
-    }
+    if (!isLoaded) return;
     setLoading(true);
 
     try {
@@ -68,6 +62,13 @@ const Register = () => {
         <>
           <TextInput
             autoCapitalize="none"
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            style={styles.inputField}
+          />
+          <TextInput
+            autoCapitalize="none"
             placeholder="test@test.com"
             value={emailAddress}
             onChangeText={setEmailAddress}
@@ -81,11 +82,7 @@ const Register = () => {
             style={styles.inputField}
           />
 
-          <Button
-            onPress={onSignUpPress}
-            title="Sign up"
-            color={"#6c47ff"}
-          ></Button>
+          <Button onPress={onSignUpPress} title="Sign up" color={"#6c47ff"} />
         </>
       )}
 
@@ -103,7 +100,7 @@ const Register = () => {
             onPress={onPressVerify}
             title="Verify Email"
             color={"#6c47ff"}
-          ></Button>
+          />
         </>
       )}
     </View>

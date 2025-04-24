@@ -10,12 +10,14 @@ import {
   Text,
   Alert,
 } from "react-native";
+import Feather from "@expo/vector-icons/Feather";
 import Spinner from "react-native-loading-spinner-overlay";
 import Loginscreen from "@/components/Loginscreen";
 
 const Login = () => {
   const { signIn, setActive, isLoaded } = useSignIn();
   const { user } = useUser();
+  const [showpass, setshowpass] = useState(false);
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -44,25 +46,6 @@ const Login = () => {
     }
   };
 
-  useEffect(() => {
-    const updateUsername = async () => {
-      if (shouldUpdateUsername && user) {
-        try {
-          await user.update({ username });
-        } catch (err: any) {
-          Alert.alert(
-            "Username Update Failed",
-            err.errors?.[0]?.message || "Unknown error"
-          );
-        } finally {
-          setShouldUpdateUsername(false);
-        }
-      }
-    };
-
-    updateUsername();
-  }, [shouldUpdateUsername, user]);
-
   return (
     <View style={styles.container}>
       <Spinner visible={loading} />
@@ -74,20 +57,25 @@ const Login = () => {
         onChangeText={setEmailAddress}
         style={styles.inputField}
       />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.inputField}
-      />
-      <TextInput
-        autoCapitalize="none"
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-        style={styles.inputField}
-      />
+      <View>
+        <TextInput
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={showpass == false ? true : false}
+          style={styles.inputField}
+        />
+        <View
+          style={{
+            position: "absolute",
+            right: 10,
+            top: "50%",
+            transform: [{ translateY: -12 }],
+          }}
+        >
+          <Feather name="eye" size={24} color="black" />
+        </View>
+      </View>
 
       <Button onPress={onSignInPress} title="Login" color={"#6c47ff"} />
 
