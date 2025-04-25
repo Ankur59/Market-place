@@ -90,7 +90,7 @@ const ProductDetails = () => {
           <TouchableOpacity
             style={styles.contactButton}
             onPress={() =>
-              navigation.navigate("ChatScreen", { SellerId: item.useremail })
+              navigation.navigate("ChatScreen", { SellerId: item.useremail,item:item })
             }
           >
             <Text style={styles.contactButtonText}>Contact Seller</Text>

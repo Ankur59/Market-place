@@ -38,6 +38,7 @@ function AppContent() {
         <Stack.Screen name="sso-callback" options={{ headerShown: false }} />
         <Stack.Screen name="ItemDetails" />
         <Stack.Screen name="CategoryPage" />
+        <Stack.Screen name="ChatScreen" options={{ headerShown: false }} />
       </Stack>
 
       <SignedIn>

@@ -4,7 +4,9 @@ import React from 'react'
 const ChatList = () => {
   return (
     <View>
-     
+     <Text>
+      
+     </Text>
     </View>
   )
 }

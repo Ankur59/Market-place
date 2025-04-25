@@ -16,7 +16,8 @@ export const ContextProvider = ({ children }) => {
         try {
             const querySnapshot = await getDocs(collection(db, "UserPosts"));
             const data = querySnapshot.docs
-                .map((item) => item.data()).filter(
+                .map((item) => ({ ...item.data(), docId: item.id, })
+                ).filter(
                     (item) => item.useremail !== user.primaryEmailAddress.emailAddress)
 
             SetPosts(data);

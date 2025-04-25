@@ -24,11 +24,12 @@ import {
   orderBy,
   onSnapshot,
 } from "firebase/firestore";
+import { Image } from "expo-image";
 
 const ChatScreen = () => {
   const route = useRoute();
   const { user, isLoaded } = useUser();
-  const { SellerId } = route.params;
+  const { SellerId, item } = route.params;
 
   const [messages, setMessages] = useState([]); // State for messages
   const [messageInput, setMessageInput] = useState(""); // State for input field
@@ -37,13 +38,14 @@ const ChatScreen = () => {
   const createChatIfNotExists = async () => {
     const buyer_id = user.primaryEmailAddress?.emailAddress;
     const seller_id = SellerId;
+    const docId = item.docId;
 
     if (!buyer_id || !seller_id) return;
 
     const ChatId =
       buyer_id < seller_id
-        ? `${buyer_id}_${seller_id}`
-        : `${seller_id}_${buyer_id}`;
+        ? `${buyer_id}_${seller_id}_${docId}`
+        : `${seller_id}_${buyer_id}_${docId}`;
 
     const chatref = doc(db, "Chats", ChatId);
     const chatsnap = await getDoc(chatref);
@@ -53,16 +55,20 @@ const ChatScreen = () => {
       if (!chatsnap.exists()) {
         // Create chat document
         await setDoc(chatref, {
-          lastMessage: "hi",
+          lastMessage: "I am interested in your product!",
           lastUpdated: serverTimestamp(),
           participants: [buyer_id, seller_id],
+          productName: item.name,
+          productPrice: item.price,
+          SellerId: seller_id,
+          docId: item.docId,
         });
 
         const messagesRef = collection(db, "Chats", ChatId, "messages");
 
         await addDoc(messagesRef, {
           sender: buyer_id,
-          data: "hi",
+          data: `I am interested in your ${item.name}`,
           timestamp: serverTimestamp(),
         });
 
@@ -80,13 +86,14 @@ const ChatScreen = () => {
     const fetchMessages = async () => {
       const buyer_id = user.primaryEmailAddress?.emailAddress;
       const seller_id = SellerId;
+      const docId = item.docId;
 
       if (!buyer_id || !seller_id) return;
 
       const ChatId =
         buyer_id < seller_id
-          ? `${buyer_id}_${seller_id}`
-          : `${seller_id}_${buyer_id}`;
+          ? `${buyer_id}_${seller_id}_${docId}`
+          : `${seller_id}_${buyer_id}_${docId}`;
 
       const messagesRef = collection(db, "Chats", ChatId, "messages");
 
@@ -111,13 +118,14 @@ const ChatScreen = () => {
   const handleSendMessage = async () => {
     const buyer_id = user.primaryEmailAddress?.emailAddress;
     const seller_id = SellerId;
+    const docId = item.docId;
 
     if (!buyer_id || !seller_id || !messageInput) return;
 
     const ChatId =
       buyer_id < seller_id
-        ? `${buyer_id}_${seller_id}`
-        : `${seller_id}_${buyer_id}`;
+        ? `${buyer_id}_${seller_id}_${docId}`
+        : `${seller_id}_${buyer_id}_${docId}`;
 
     const messagesRef = collection(db, "Chats", ChatId, "messages");
 
@@ -138,7 +146,39 @@ const ChatScreen = () => {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Seller Name</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            minWidth: 250,
+            maxWidth: 260,
+            alignItems: "center",
+          }}
+        >
+          <View>
+            <Image
+              source={{ uri: item.userimage }}
+              style={{ width: 40, height: 40, borderRadius: 20 }}
+            />
+          </View>
+
+          <View>
+            <View style={{ justifyContent: "center", alignItems: "center" }}>
+              <Text>Product name</Text>
+            </View>
+            <Text style={styles.headerTitle}>{item.name}</Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "grey" }}>
+          Don't Share any sensitive information in this chat
+        </Text>
       </View>
 
       {/* Message List */}
