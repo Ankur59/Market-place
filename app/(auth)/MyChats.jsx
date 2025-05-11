@@ -70,6 +70,8 @@ const MyChats = () => {
             productPrice: data.productPrice || "",
             SellerId: data.SellerId || otherUserEmail,
             docId: data.docId || chatId,
+            buyer_id: data.buyer_id || otherUserEmail,
+
             // Add any other fields needed for ChatScreen
           };
         });
@@ -93,6 +95,7 @@ const MyChats = () => {
     // Prepare the navigation params to match the expected format in ChatScreen
     navigation.navigate("ChatScreen", {
       SellerId: item.SellerId,
+      buyerId: item.buyer_id,
       item: {
         docId: item.docId || item.id,
         name: item.productName,

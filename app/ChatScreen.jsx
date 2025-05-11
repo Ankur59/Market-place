@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  SafeAreaView,
+  Keyboard,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -29,14 +31,18 @@ import { Image } from "expo-image";
 const ChatScreen = () => {
   const route = useRoute();
   const { user, isLoaded } = useUser();
-  const { SellerId, item } = route.params;
+  const { SellerId, item, buyerId } = route.params;
+  const flatListRef = useRef(null);
 
   const [messages, setMessages] = useState([]); // State for messages
   const [messageInput, setMessageInput] = useState(""); // State for input field
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   //   Function to initialilze chat if not exists on firebase
+  const usermail = user?.primaryEmailAddress?.emailAddress;
+
   const createChatIfNotExists = async () => {
-    const buyer_id = user.primaryEmailAddress?.emailAddress;
+    const buyer_id = buyerId;
     const seller_id = SellerId;
     const docId = item.docId;
 
@@ -62,12 +68,13 @@ const ChatScreen = () => {
           productPrice: item.price,
           SellerId: seller_id,
           docId: item.docId,
+          buyer_id: buyer_id,
         });
 
         const messagesRef = collection(db, "Chats", ChatId, "messages");
 
         await addDoc(messagesRef, {
-          sender: buyer_id,
+          sender: usermail,
           data: `I am interested in your ${item.name}`,
           timestamp: serverTimestamp(),
         });
@@ -81,10 +88,56 @@ const ChatScreen = () => {
     }
   };
 
+  // Listen for keyboard events
+  useEffect(() => {
+    const keyboardWillShowListener =
+      Platform.OS === "ios"
+        ? Keyboard.addListener("keyboardWillShow", () => {
+            setKeyboardVisible(true);
+            // Scroll to bottom when keyboard appears
+            if (flatListRef.current && messages.length > 0) {
+              flatListRef.current.scrollToEnd({ animated: true });
+            }
+          })
+        : null;
+
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+        // Scroll to bottom when keyboard appears
+        if (flatListRef.current && messages.length > 0) {
+          flatListRef.current.scrollToEnd({ animated: true });
+        }
+      }
+    );
+
+    const keyboardWillHideListener =
+      Platform.OS === "ios"
+        ? Keyboard.addListener("keyboardWillHide", () => {
+            setKeyboardVisible(false);
+          })
+        : null;
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      if (keyboardWillShowListener) keyboardWillShowListener.remove();
+      if (keyboardDidShowListener) keyboardDidShowListener.remove();
+      if (keyboardWillHideListener) keyboardWillHideListener.remove();
+      if (keyboardDidHideListener) keyboardDidHideListener.remove();
+    };
+  }, [messages.length]);
+
   // Fetch messages from Firestore
   useEffect(() => {
     const fetchMessages = async () => {
-      const buyer_id = user.primaryEmailAddress?.emailAddress;
+      const buyer_id = buyerId;
       const seller_id = SellerId;
       const docId = item.docId;
 
@@ -103,6 +156,13 @@ const ChatScreen = () => {
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const messagesArray = querySnapshot.docs.map((doc) => doc.data());
         setMessages(messagesArray); // Update the state with the fetched messages
+
+        // Scroll to bottom when new messages arrive
+        if (flatListRef.current && messagesArray.length > 0) {
+          setTimeout(() => {
+            flatListRef.current.scrollToEnd({ animated: true });
+          }, 200);
+        }
       });
 
       // Clean up the listener when the component unmounts
@@ -116,11 +176,11 @@ const ChatScreen = () => {
   }, [isLoaded, user, SellerId]);
 
   const handleSendMessage = async () => {
-    const buyer_id = user.primaryEmailAddress?.emailAddress;
+    const buyer_id = buyerId;
     const seller_id = SellerId;
     const docId = item.docId;
 
-    if (!buyer_id || !seller_id || !messageInput) return;
+    if (!buyer_id || !seller_id || !messageInput.trim()) return;
 
     const ChatId =
       buyer_id < seller_id
@@ -130,97 +190,127 @@ const ChatScreen = () => {
     const messagesRef = collection(db, "Chats", ChatId, "messages");
 
     await addDoc(messagesRef, {
-      sender: buyer_id,
-      data: messageInput,
+      sender: usermail,
+      data: messageInput.trim(),
       timestamp: serverTimestamp(),
     });
 
     setMessageInput(""); // Clear input field after sending
   };
 
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-    >
-      {/* Header */}
-      <View style={styles.header}>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+        contentContainerStyle={{ flex: 1 }}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              minWidth: 250,
+              maxWidth: 260,
+              alignItems: "center",
+            }}
+          >
+            <View>
+              <Image
+                source={{ uri: item.userimage }}
+                style={{ width: 40, height: 40, borderRadius: 20 }}
+              />
+            </View>
+
+            <View style={{marginTop:"10%"}}>
+              <View style={{ justifyContent: "center", alignItems: "center" }}>
+                <Text>Product name</Text>
+              </View>
+              <Text style={styles.headerTitle}>{item.name}</Text>
+            </View>
+          </View>
+        </View>
         <View
           style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            minWidth: 250,
-            maxWidth: 260,
+            justifyContent: "center",
             alignItems: "center",
           }}
         >
-          <View>
-            <Image
-              source={{ uri: item.userimage }}
-              style={{ width: 40, height: 40, borderRadius: 20 }}
-            />
-          </View>
-
-          <View>
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <Text>Product name</Text>
-            </View>
-            <Text style={styles.headerTitle}>{item.name}</Text>
-          </View>
+          <Text style={{ color: "grey" }}>
+            Don't Share any sensitive information in this chat
+          </Text>
         </View>
-      </View>
-      <View
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ color: "grey" }}>
-          Don't Share any sensitive information in this chat
-        </Text>
-      </View>
 
-      {/* Message List */}
-      <FlatList
-        data={messages} // The messages from Firestore
-        renderItem={({ item }) => (
-          <View
-            style={[
-              styles.messageBubble,
-              item.sender === user.primaryEmailAddress?.emailAddress
-                ? styles.theirMessage
-                : styles.myMessage,
-            ]}
-          >
-            <Text style={styles.messageText}>{item.data}</Text>
-            <Text style={styles.timeText}>
-              {new Date(item.timestamp?.seconds * 1000).toLocaleTimeString()}
-            </Text>
-          </View>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.messagesList}
-      />
-
-      {/* Input Area */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type a message..."
-          multiline
-          value={messageInput}
-          onChangeText={setMessageInput}
+        {/* Message List */}
+        <FlatList
+          ref={flatListRef}
+          data={messages} // The messages from Firestore
+          renderItem={({ item }) => (
+            <View
+              style={[
+                styles.messageBubble,
+                item.sender === usermail
+                  ? styles.myMessage
+                  : styles.theirMessage,
+              ]}
+            >
+              <Text style={styles.messageText}>{item.data}</Text>
+              <Text style={styles.timeText}>
+                {item.timestamp?.seconds
+                  ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString()
+                  : "Sending..."}
+              </Text>
+            </View>
+          )}
+          keyExtractor={(item, index) => index.toString()}
+          contentContainerStyle={styles.messagesList}
+          onContentSizeChange={() => {
+            if (flatListRef.current && messages.length > 0) {
+              flatListRef.current.scrollToEnd({ animated: false });
+            }
+          }}
+          onLayout={() => {
+            if (flatListRef.current && messages.length > 0) {
+              flatListRef.current.scrollToEnd({ animated: false });
+            }
+          }}
+          onScrollBeginDrag={dismissKeyboard}
         />
-        <TouchableOpacity style={styles.sendButton} onPress={handleSendMessage}>
-          <Ionicons name="send" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+
+        {/* Input Area */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Type a message..."
+            multiline
+            value={messageInput}
+            onChangeText={setMessageInput}
+            maxHeight={100}
+          />
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={handleSendMessage}
+            disabled={!messageInput.trim()}
+          >
+            <Ionicons name="send" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
@@ -243,6 +333,7 @@ const styles = StyleSheet.create({
   },
   messagesList: {
     padding: 16,
+    flexGrow: 1,
   },
   messageBubble: {
     maxWidth: "75%",
@@ -257,7 +348,7 @@ const styles = StyleSheet.create({
   },
   theirMessage: {
     alignSelf: "flex-start",
-    backgroundColor: "grey",
+    backgroundColor: "blue",
   },
   messageText: {
     fontSize: 16,

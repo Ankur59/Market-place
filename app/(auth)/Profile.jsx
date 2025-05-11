@@ -152,7 +152,7 @@ const Profile = () => {
         text={"My Listings"}
         action={() => redir("/Myproducts")}
       />
-      <ProfileCards
+      {/* <ProfileCards
         icons={
           <FontAwesome5
             name="box-open"
@@ -161,7 +161,7 @@ const Profile = () => {
           />
         }
         text={"My Orders"}
-      />
+      /> */}
       <ProfileCards
         icons={
           <Entypo

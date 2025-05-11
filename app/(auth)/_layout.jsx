@@ -46,18 +46,6 @@ const TabsPage = () => {
         }}
         redirect={!isSignedIn}
       />
-
-      <Tabs.Screen
-        name="explore"
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="compass-outline" size={size} color={color} />
-          ),
-          tabBarLabel: "Explore",
-        }}
-        redirect={!isSignedIn}
-      />
       <Tabs.Screen
         name="addpost"
         options={{
@@ -70,6 +58,17 @@ const TabsPage = () => {
         redirect={!isSignedIn}
       />
       <Tabs.Screen
+        name="MyChats"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Entypo name="chat" size={size} color={color} />
+          ),
+          tabBarLabel: "Chats",
+        }}
+        redirect={!isSignedIn}
+      />
+      <Tabs.Screen
         name="Profile"
         options={{
           headerShown: true,
@@ -78,17 +77,6 @@ const TabsPage = () => {
           ),
           title: "My Profile",
           headerRight: () => <LogoutButton />,
-        }}
-        redirect={!isSignedIn}
-      />
-      <Tabs.Screen
-        name="MyChats"
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color, size }) => (
-            <Entypo name="chat" size={size} color={color} />
-          ),
-          tabBarLabel: "Chats",
         }}
         redirect={!isSignedIn}
       />

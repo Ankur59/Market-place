@@ -14,7 +14,7 @@ const Category = ({ source }) => {
         marginTop: "3.6%",
       }}
     >
-      <Text style={{ marginBottom: "2%", fontWeight: 600, fontSize: 15 }}>
+      <Text style={{ marginBottom: "1%", fontWeight: 600, fontSize: 15 }}>
         Categories
       </Text>
       <FlatList

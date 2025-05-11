@@ -11,12 +11,14 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRoute } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
+import { useUser } from "@clerk/clerk-expo";
 import { Feather, Ionicons } from "@expo/vector-icons";
 
 const ProductDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { item } = route.params;
+  const { user, isLoaded } = useUser();
 
   // State to store share message and loading state
   const [shareMessage, setShareMessage] = useState("");
@@ -90,7 +92,11 @@ const ProductDetails = () => {
           <TouchableOpacity
             style={styles.contactButton}
             onPress={() =>
-              navigation.navigate("ChatScreen", { SellerId: item.useremail,item:item })
+              navigation.navigate("ChatScreen", {
+                SellerId: item.useremail,
+                item: item,
+                buyerId: user.primaryEmailAddress?.emailAddress,
+              })
             }
           >
             <Text style={styles.contactButtonText}>Contact Seller</Text>

@@ -1,23 +1,26 @@
-import { View, Text, Image, TextInput } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import { useUser } from "@clerk/clerk-expo";
 import { hp, wp } from "../common/helper";
 import { AntDesign } from "@expo/vector-icons";
+import { useNavigation } from "expo-router";
 
-const ProfileHeader = () => {
+const ProfileHeader = ({ posts, setFilteredPosts }) => {
   const { user } = useUser();
+  const navigation = useNavigation();
+
   return (
-    // Header Section
     <View>
+      {/* Header User Info Section */}
       <View
         style={{
           flexDirection: "row",
-          backgroundColor: "rd",
+          backgroundColor: "transparent",
           alignItems: "center",
-          marginTop: 10,
+          marginTop: "10%",
         }}
       >
-        <View style={{ backgroundColor: "yelow", marginLeft: 10 }}>
+        <View style={{ backgroundColor: "transparent", marginLeft: 10 }}>
           <Image
             source={{ uri: user?.imageUrl }}
             style={{
@@ -28,16 +31,14 @@ const ProfileHeader = () => {
           />
         </View>
         <View style={{ marginLeft: 10 }}>
-          <View>
-            <Text style={{ fontWeight: 600, fontSize: 15 }}>Welcome</Text>
-          </View>
-          <View>
-            <Text style={{ fontWeight: 600, fontSize: 15 }}>
-              {user?.fullName}
-            </Text>
-          </View>
+          <Text style={{ fontWeight: "600", fontSize: 15 }}>Welcome</Text>
+          <Text style={{ fontWeight: "600", fontSize: 15 }}>
+            {user?.fullName}
+          </Text>
         </View>
       </View>
+
+      {/* Search Button Section */}
       <View style={{ width: "100%", alignItems: "center" }}>
         <View
           style={{
@@ -56,14 +57,14 @@ const ProfileHeader = () => {
             color="black"
             style={{ marginRight: 8 }}
           />
-          <TextInput
-            style={{
-              flex: 1,
-              padding: 10,
-              borderWidth: 0,
+          <TouchableOpacity
+            style={{ flex: 1, padding: 10 }}
+            onPress={() => {
+              navigation.navigate("SearchPage");
             }}
-            placeholder="Search"
-          />
+          >
+            <Text style={{ color: "#888" }}>Search</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

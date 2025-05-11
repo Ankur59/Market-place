@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { useAuth, useOAuth } from "@clerk/clerk-expo";
 
@@ -8,23 +8,32 @@ export default function SSOCallback() {
   const router = useRouter();
   const { handleOAuthCallback } = useOAuth();
 
-  // This use effect is called when there is a change in islaoded and issignedin
+  const [hasHandledCallback, setHasHandledCallback] = useState(false);
 
   useEffect(() => {
-    // if the authentication is completed isloaded will be true the handleOAuthcallback will be called
-    if (isLoaded) {
-      handleOAuthCallback();
-    }
+    const processOAuth = async () => {
+      try {
+        await handleOAuthCallback(); // process the OAuth redirect
+        setHasHandledCallback(true);
+      } catch (err) {
+        console.error("OAuth callback error", err);
+        // Optionally navigate to error screen
+        router.replace("/(public)/Welcome");
+      }
+    };
 
-    // If the user session token is genrated issigned will be true then the user will be redirected to the home screen
-    if (isSignedIn) {
+    if (isLoaded && !hasHandledCallback) {
+      processOAuth();
+    }
+  }, [isLoaded]);
+
+  useEffect(() => {
+    if (hasHandledCallback && isSignedIn) {
       router.replace("/(auth)/home");
-    } else {  
-      
-      // If no condition matches then it means the session is not created so we can redirect the user to the welcome page which is public
+    } else if (hasHandledCallback && !isSignedIn) {
       router.replace("/(public)/Welcome");
     }
-  }, [isLoaded, isSignedIn]);
+  }, [hasHandledCallback, isSignedIn]);
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
