@@ -75,5 +75,16 @@
     "react-test-renderer": "^19.0.0",
     "typescript": "^5.3.3"
   },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-keyboard-aware-scroll-view",
+          "react-native-loading-spinner-overlay"
+        ],
+        "listUnknownPackages": false
+      }
+    }
+  },
   "private": true
 }
