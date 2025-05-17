@@ -1,7 +1,7 @@
 import { Redirect, Stack } from "expo-router";
 import "react-native-reanimated";
 import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
-import { tokenCache } from "@/cache";
+import { tokenCache } from "../cache";
 import { ContextProvider } from "../Context/DataContext";
 import SyncUserToFirestore from "../components/Syncwithfirebase";
 import { useUserRole, UserRoleProvider } from "../Context/RoleContext";
@@ -18,14 +18,19 @@ if (!publishableKey) {
 // ✅ This component is wrapped by the context provider, so it's safe to use the hook here
 function AppContent() {
   const { fetchUserData, userData } = useUserRole(); // ✅ now this is safe
-  // Optional: auto-fetch role
+
   useEffect(() => {
-    fetchUserData();
+    try {
+      fetchUserData();
+      console.log("User data fetched successfully");
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
   }, []);
 
-  // useEffect(() => {
-  //   console.log(userData);
-  // }, [userData]);
+  useEffect(() => {
+    console.log("Current user data:", userData);
+  }, [userData]);
 
   return (
     <>
@@ -44,7 +49,7 @@ function AppContent() {
         <SyncUserToFirestore />
       </SignedIn>
       <SignedOut>
-        <Redirect href="../(public)/Welcome" />
+        <Redirect href="/(public)/Welcome" />
       </SignedOut>
     </>
   );
@@ -52,7 +57,13 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+    <ClerkProvider
+      publishableKey={publishableKey}
+      tokenCache={tokenCache}
+      onError={(error) => {
+        console.error("Clerk error:", error);
+      }}
+    >
       <UserRoleProvider>
         <ContextProvider>
           <ThemeProvider>
