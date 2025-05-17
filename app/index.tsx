@@ -14,11 +14,14 @@ const Index = () => {
       if (isSignedIn) {
         setStatus("Signed in, navigating to home...");
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        router.replace("/(auth)/home");
+        router.replace({
+          pathname: "/(auth)/home",
+        });
       } else {
         setStatus("Not signed in, navigating to welcome...");
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        router.replace("/(public)/Welcome");
+        // Navigate to the public layout's index
+        router.replace("/");
       }
     } catch (err) {
       const errorMessage =
@@ -48,7 +51,14 @@ const Index = () => {
 
   return (
     // This page is only used to show a loading indicator when the app is loading
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "white",
+      }}
+    >
       <ActivityIndicator size="large" color="#6c47ff" />
       <Text
         style={{ marginTop: 10, marginHorizontal: 20, textAlign: "center" }}

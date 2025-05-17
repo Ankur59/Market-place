@@ -1,9 +1,24 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { router } from "expo-router";
-import Loginscreen from "@/components/Loginscreen";
+import Loginscreen from "../../components/Loginscreen";
+import ErrorOverlay from "../../components/ErrorOverlay";
 
 const Welcome = () => {
+  const [error, setError] = useState(null);
+
+  const handleNavigation = (path) => {
+    try {
+      router.push(`/(public)/${path}`);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  if (error) {
+    return <ErrorOverlay error={error} onRetry={() => setError(null)} />;
+  }
+
   return (
     // Main container with full screen dimensions and relative positioning
     <View style={styles.container}>
@@ -34,7 +49,7 @@ const Welcome = () => {
           <TouchableOpacity
             style={styles.signupButton}
             activeOpacity={0.5}
-            onPress={() => router.push("/register")}
+            onPress={() => handleNavigation("register")}
           >
             <Text style={styles.signupButtonText}>Sign-up</Text>
           </TouchableOpacity>
@@ -42,7 +57,7 @@ const Welcome = () => {
           <TouchableOpacity
             style={styles.signinButton}
             activeOpacity={0.5}
-            onPress={() => router.push("/login")}
+            onPress={() => handleNavigation("login")}
           >
             <Text style={styles.signinButtonText}>Sign in</Text>
           </TouchableOpacity>
@@ -60,6 +75,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     position: "relative",
+    backgroundColor: "white",
   },
   heroImage: {
     width: "100%",
