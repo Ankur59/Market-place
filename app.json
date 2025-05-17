@@ -8,6 +8,7 @@
     "scheme": "havenmart",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "sdkVersion": "53.0.0",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.havenmart.app",
@@ -21,9 +22,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.havenmart.app",
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",

@@ -1,6 +1,5 @@
 import { Redirect, Stack } from "expo-router";
 import "react-native-reanimated";
-import "../global.css";
 import { ClerkProvider, SignedIn, SignedOut } from "@clerk/clerk-expo";
 import { tokenCache } from "@/cache";
 import { ContextProvider } from "../Context/DataContext";
