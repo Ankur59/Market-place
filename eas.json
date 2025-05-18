@@ -11,10 +11,7 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease",
-        "env": {
-          "JAVA_HOME": "/usr/lib/jvm/java-11-openjdk-amd64"
-        }
+        "gradleCommand": ":app:assembleRelease"
       }
     },
     "production": {}
