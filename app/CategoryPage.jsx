@@ -208,7 +208,7 @@ const CategoryPage = () => {
           data={filteredPosts}
           renderItem={({ item }) => (
             <ProductCard
-              imageUrl={item.Image}
+              imageUrl={item.image}
               name={item.name}
               price={item.price}
               action={() => navigation.navigate("productDetails", { item })}

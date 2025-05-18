@@ -1,12 +1,12 @@
 import {
   View,
   Text,
-  ScrollView,
   SafeAreaView,
   ActivityIndicator,
   StyleSheet,
   RefreshControl,
   Dimensions,
+  FlatList,
 } from "react-native";
 import React, { useEffect, useState, useCallback } from "react";
 import ProfileHeader from "../../components/ProfileHeader";
@@ -18,6 +18,8 @@ import LatestItems from "../../components/LatestItems";
 import { useAuth } from "../../Context/DataContext";
 import { useLocation } from "../../Context/LocationContext";
 import { UseTheme } from "../../Context/ThemeContext";
+import ProductCard from "../../components/Card";
+import { useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
@@ -25,6 +27,7 @@ const Home = () => {
   const { Posts, GetPostsData, GetCategoryData, Categories } = useAuth();
   const { getCurrentLocation, location, address } = useLocation();
   const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
+  const navigation = useNavigation();
   const db = getFirestore(app);
 
   const [Slider_Img, SetSlider_Img] = useState([]);
@@ -116,6 +119,33 @@ const Home = () => {
     }
   }, [Categories]);
 
+  const ListHeader = () => (
+    <>
+      <ProfileHeader />
+      {address && (
+        <View style={[styles.locationContainer, commonStyles.card]}>
+          <Text style={[styles.locationText, commonStyles.text]}>
+            📍 Showing items near {address.city}, {address.region}
+          </Text>
+        </View>
+      )}
+      <View style={styles.sliderContainer}>
+        <Slider source={Slider_Img} />
+      </View>
+      <View style={styles.sectionContainer}>
+        <Text style={[styles.sectionTitle, commonStyles.text]}>
+          Browse Categories
+        </Text>
+        <Category source={Categories} />
+      </View>
+      <View style={styles.sectionContainer}>
+        <Text style={[styles.sectionTitle, commonStyles.text]}>
+          Latest Items Near You
+        </Text>
+      </View>
+    </>
+  );
+
   if (Loading) {
     return (
       <View style={[styles.loadingContainer, commonStyles.container]}>
@@ -126,7 +156,19 @@ const Home = () => {
 
   return (
     <SafeAreaView style={[styles.container, commonStyles.container]}>
-      <ScrollView
+      <FlatList
+        data={filteredPosts}
+        numColumns={2}
+        ListHeaderComponent={ListHeader}
+        renderItem={({ item }) => (
+          <ProductCard
+            imageUrl={item.image}
+            name={item.name}
+            price={item.price}
+            action={() => navigation.navigate("productDetails", { item })}
+          />
+        )}
+        keyExtractor={(item, index) => index.toString()}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -135,31 +177,8 @@ const Home = () => {
           />
         }
         showsVerticalScrollIndicator={false}
-      >
-        <ProfileHeader />
-        {address && (
-          <View style={[styles.locationContainer, commonStyles.card]}>
-            <Text style={[styles.locationText, commonStyles.text]}>
-              📍 Showing items near {address.city}, {address.region}
-            </Text>
-          </View>
-        )}
-        <View style={styles.sliderContainer}>
-          <Slider source={Slider_Img} />
-        </View>
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, commonStyles.text]}>
-            Browse Categories
-          </Text>
-          <Category source={Categories} />
-        </View>
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, commonStyles.text]}>
-            Latest Items Near You
-          </Text>
-          <LatestItems source={filteredPosts} />
-        </View>
-      </ScrollView>
+        contentContainerStyle={styles.listContainer}
+      />
     </SafeAreaView>
   );
 };
@@ -167,6 +186,9 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  listContainer: {
+    paddingBottom: 20,
   },
   loadingContainer: {
     flex: 1,

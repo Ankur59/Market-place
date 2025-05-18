@@ -8,6 +8,7 @@ import { useUserRole, UserRoleProvider } from "../Context/RoleContext";
 import { useEffect } from "react";
 import { ThemeProvider } from "../Context/ThemeContext";
 import { LocationProvider } from "../Context/LocationContext";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const publishableKey =
   "pk_test_ZXZvbHZlZC1maXJlZmx5LTUxLmNsZXJrLmFjY291bnRzLmRldiQ";
@@ -33,11 +34,14 @@ function AppContent() {
       <Stack>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(public)" options={{ headerShown: false }} />
-        <Stack.Screen name="productDetails" options={{ headerShown: true }} />
+        <Stack.Screen
+          name="productDetails"
+          options={{ headerShown: true, title: "Product Details" }}
+        />
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="sso-callback" options={{ headerShown: false }} />
         <Stack.Screen name="ItemDetails" />
-        <Stack.Screen name="CategoryPage" />
+        <Stack.Screen name="CategoryPage" options={{ headerShown: true }} />
         <Stack.Screen name="ChatScreen" options={{ headerShown: false }} />
       </Stack>
 
@@ -58,7 +62,9 @@ export default function RootLayout() {
         <ContextProvider>
           <ThemeProvider>
             <LocationProvider>
-              <AppContent />
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <AppContent />
+              </GestureHandlerRootView>
             </LocationProvider>
           </ThemeProvider>
         </ContextProvider>

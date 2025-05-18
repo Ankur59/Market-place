@@ -5,12 +5,13 @@ import { hp, wp } from "../common/helper";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
 import { UseTheme } from "../Context/ThemeContext";
+import { useRouter } from "expo-router";
 
 const ProfileHeader = ({ posts, setFilteredPosts }) => {
   const { user } = useUser();
   const navigation = useNavigation();
   const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
-
+  const router = useRouter();
   return (
     <View>
       {/* Header User Info Section */}
@@ -19,9 +20,15 @@ const ProfileHeader = ({ posts, setFilteredPosts }) => {
           flexDirection: "row",
           backgroundColor: "transparent",
           alignItems: "center",
+          marginTop: hp(2),
         }}
       >
-        <View style={{ backgroundColor: "transparent", marginLeft: 10 }}>
+        <TouchableOpacity
+          style={{ backgroundColor: "transparent", marginLeft: 10 }}
+          onPress={() => {
+            router.push("/Profile");
+          }}
+        >
           <Image
             source={{ uri: user?.imageUrl }}
             style={{
@@ -30,7 +37,7 @@ const ProfileHeader = ({ posts, setFilteredPosts }) => {
               borderRadius: 100,
             }}
           />
-        </View>
+        </TouchableOpacity>
         <View style={{ marginLeft: 10 }}>
           <Text
             style={[{ fontWeight: "600", fontSize: 15 }, commonStyles.text]}
@@ -60,7 +67,7 @@ const ProfileHeader = ({ posts, setFilteredPosts }) => {
             alignItems: "center",
             paddingHorizontal: 10,
             marginTop: hp(2),
-            backgroundColor: Theme === "dark" ? "#2C3E50" : "#fff",
+            backgroundColor: Theme === "dark" ? colorShades.whiteShades.jet : "#fff",
           }}
         >
           <AntDesign
