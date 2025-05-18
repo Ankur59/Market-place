@@ -4,10 +4,12 @@ import { useUser } from "@clerk/clerk-expo";
 import { hp, wp } from "../common/helper";
 import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "expo-router";
+import { UseTheme } from "../Context/ThemeContext";
 
 const ProfileHeader = ({ posts, setFilteredPosts }) => {
   const { user } = useUser();
   const navigation = useNavigation();
+  const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
 
   return (
     <View>
@@ -17,7 +19,6 @@ const ProfileHeader = ({ posts, setFilteredPosts }) => {
           flexDirection: "row",
           backgroundColor: "transparent",
           alignItems: "center",
-          marginTop: "10%",
         }}
       >
         <View style={{ backgroundColor: "transparent", marginLeft: 10 }}>
@@ -31,8 +32,14 @@ const ProfileHeader = ({ posts, setFilteredPosts }) => {
           />
         </View>
         <View style={{ marginLeft: 10 }}>
-          <Text style={{ fontWeight: "600", fontSize: 15 }}>Welcome</Text>
-          <Text style={{ fontWeight: "600", fontSize: 15 }}>
+          <Text
+            style={[{ fontWeight: "600", fontSize: 15 }, commonStyles.text]}
+          >
+            Welcome
+          </Text>
+          <Text
+            style={[{ fontWeight: "600", fontSize: 15 }, commonStyles.text]}
+          >
             {user?.fullName}
           </Text>
         </View>
@@ -44,17 +51,24 @@ const ProfileHeader = ({ posts, setFilteredPosts }) => {
           style={{
             width: "85%",
             borderWidth: 1,
+            borderColor:
+              Theme === "dark"
+                ? colorShades.whiteShades.ghostWhite + "40"
+                : "#000",
             borderRadius: 20,
             flexDirection: "row",
             alignItems: "center",
             paddingHorizontal: 10,
             marginTop: hp(2),
+            backgroundColor: Theme === "dark" ? "#2C3E50" : "#fff",
           }}
         >
           <AntDesign
             name="search1"
             size={24}
-            color="black"
+            color={
+              Theme === "dark" ? colorShades.whiteShades.ghostWhite : "black"
+            }
             style={{ marginRight: 8 }}
           />
           <TouchableOpacity
@@ -63,7 +77,16 @@ const ProfileHeader = ({ posts, setFilteredPosts }) => {
               navigation.navigate("SearchPage");
             }}
           >
-            <Text style={{ color: "#888" }}>Search</Text>
+            <Text
+              style={{
+                color:
+                  Theme === "dark"
+                    ? colorShades.whiteShades.ghostWhite + "80"
+                    : "#888",
+              }}
+            >
+              Search
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

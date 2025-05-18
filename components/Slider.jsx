@@ -9,7 +9,7 @@ const Slider = ({ source }) => {
   const [currentIndex, setIndex] = useState(0);
   //Reference to pass to flatlist for autoscroling
   const flatlistref = useRef();
-  const { Theme } = UseTheme();
+  const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
   useEffect(() => {
     console.log(Theme);
   }, [Theme]);
@@ -51,7 +51,14 @@ const Slider = ({ source }) => {
         <View
           key={index}
           style={{
-            backgroundColor: index === currentIndex ? "black" : "#D3D3D3",
+            backgroundColor:
+              index === currentIndex
+                ? Theme === "dark"
+                  ? colorShades.whiteShades.ghostWhite
+                  : "black"
+                : Theme === "dark"
+                ? "#4A5568"
+                : "#D3D3D3",
             height: hp(1),
             width: hp(1),
             borderRadius: 100,
@@ -81,7 +88,13 @@ const Slider = ({ source }) => {
         data={source}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <View>
+          <View
+            style={{
+              backgroundColor: Theme === "dark" ? "#1a1a1a" : "#fff",
+              borderRadius: 10,
+              overflow: "hidden",
+            }}
+          >
             <Image
               source={{ uri: item.Image }}
               style={{ width: screenwidth, height: hp(25) }}
@@ -94,7 +107,6 @@ const Slider = ({ source }) => {
         style={{
           flexDirection: "row",
           justifyContent: "center",
-          backgroundColor: "yllow",
           marginTop: wp(2),
         }}
       >

@@ -4,6 +4,7 @@ import { hp, wp } from "../common/helper";
 import { useNavigation } from "@react-navigation/native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { EvilIcons, FontAwesome5 } from "@expo/vector-icons";
+import { UseTheme } from "../Context/ThemeContext";
 
 const ProductCard = ({
   name,
@@ -15,10 +16,26 @@ const ProductCard = ({
   onEdit,
 }) => {
   const Wrapper = condition ? View : TouchableOpacity;
+  const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
+
   return (
-    <Wrapper style={styles.card} onPress={action}>
+    <Wrapper
+      style={[
+        styles.card,
+        {
+          backgroundColor: Theme === "dark" ? "#2C3E50" : "white",
+          shadowColor: Theme === "dark" ? "#000" : "#000",
+        },
+      ]}
+      onPress={action}
+    >
       {/* Product Image */}
-      <View style={styles.imageContainer}>
+      <View
+        style={[
+          styles.imageContainer,
+          { backgroundColor: Theme === "dark" ? "#1a1a1a" : "#f9f9f9" },
+        ]}
+      >
         <Image
           source={{ uri: imageUrl }}
           style={styles.image}
@@ -39,7 +56,7 @@ const ProductCard = ({
           >
             <TouchableOpacity
               style={{
-                backgroundColor: "white",
+                backgroundColor: Theme === "dark" ? "#1a1a1a" : "white",
                 padding: 2,
                 alignItems: "center",
                 justifyContent: "center",
@@ -51,7 +68,7 @@ const ProductCard = ({
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                backgroundColor: "white",
+                backgroundColor: Theme === "dark" ? "#1a1a1a" : "white",
                 padding: 2,
                 height: 30,
                 width: 30,
@@ -61,7 +78,15 @@ const ProductCard = ({
               }}
               onPress={onEdit}
             >
-              <FontAwesome5 name="pencil-alt" size={15} color="black" />
+              <FontAwesome5
+                name="pencil-alt"
+                size={15}
+                color={
+                  Theme === "dark"
+                    ? colorShades.whiteShades.ghostWhite
+                    : "black"
+                }
+              />
             </TouchableOpacity>
           </View>
         ) : null}
@@ -69,10 +94,26 @@ const ProductCard = ({
 
       {/* Product Info */}
       <View style={styles.infoContainer}>
-        <Text style={styles.name} numberOfLines={1}>
+        <Text
+          style={[
+            styles.name,
+            {
+              color:
+                Theme === "dark" ? colorShades.whiteShades.ghostWhite : "#333",
+            },
+          ]}
+          numberOfLines={1}
+        >
           {name}
         </Text>
-        <Text style={styles.price}>₹{price}</Text>
+        <Text
+          style={[
+            styles.price,
+            { color: Theme === "dark" ? "#4CAF50" : "#2E8B57" },
+          ]}
+        >
+          ₹{price}
+        </Text>
       </View>
     </Wrapper>
   );
@@ -80,9 +121,7 @@ const ProductCard = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "white",
     borderRadius: 8,
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -93,7 +132,6 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     height: hp(15),
-    backgroundColor: "#f9f9f9",
   },
   image: {
     width: "100%",
@@ -105,13 +143,11 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#333",
     marginBottom: 4,
   },
   price: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#2E8B57",
   },
 });
 

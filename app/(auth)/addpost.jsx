@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   Image,
   ToastAndroid,
-  KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
   ActivityIndicator,
   Alert,
+  Dimensions,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { addDoc, collection, getDocs, getFirestore } from "firebase/firestore";
@@ -22,20 +22,28 @@ import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useUser } from "@clerk/clerk-expo";
-import { v4 as uuidv4 } from "uuid";
+import { useLocation } from "../../Context/LocationContext";
+import { MaterialIcons } from "@expo/vector-icons";
+import { UseTheme } from "../../Context/ThemeContext";
+
+const { width } = Dimensions.get("window");
 
 const Add = () => {
   const { user } = useUser();
+  const { location, address, getCurrentLocation } = useLocation();
+  const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
 
-  const [categorylist, setCategoryList] = useState([]); //State to storeee all the categorynames fetched from fireebase
+  const [categorylist, setCategoryList] = useState([]);
   const [Loading, SetLoading] = useState(false);
-
-  const [image, setImage] = useState(null); //State to store the selected image from the user
-  const db = getFirestore(app); //Initialize firestore database
-  const storage = getStorage(); //Initialize Storage
+  const [image, setImage] = useState(null);
+  const db = getFirestore(app);
+  const storage = getStorage();
 
   useEffect(() => {
     getCategoryList();
+    if (!location) {
+      getCurrentLocation();
+    }
   }, []);
 
   const getCategoryList = async () => {
@@ -43,21 +51,19 @@ const Add = () => {
       const querySnapshot = await getDocs(collection(db, "Categories"));
       const categories = querySnapshot.docs.map((doc) => doc.data());
 
-      setCategoryList(categories); // Update state once, after collecting all data
+      setCategoryList(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
   };
-  //Component to open image picker
+
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images", "videos"],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-    //If image is selected successfully then it will be stored to the Image state
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
@@ -75,23 +81,30 @@ const Add = () => {
       const image_blob = await response.blob();
       const storageref = ref(storage, "CommunityPost/" + Date.now() + ".jpg");
 
-      // Upload the image
       await uploadBytes(storageref, image_blob);
 
-      // Get the download URL
       const downloadurl = await getDownloadURL(storageref);
 
-      // Prepare the document data
       value.image = downloadurl;
       value.useremail = user.primaryEmailAddress.emailAddress;
       value.username = user.fullName;
       value.userimage = user.imageUrl;
       value.customId = Date.now().toString();
 
-      // Add document to Firestore
+      if (location) {
+        value.location = {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        };
+      }
+      if (address) {
+        value.formattedAddress = address.formattedAddress;
+        value.city = address.city;
+        value.region = address.region;
+      }
+
       const docref = await addDoc(collection(db, "UserPosts"), value);
 
-      // Success!
       SetLoading(false);
       Alert.alert("Post Data Uploaded Successfully");
       setImage(null);
@@ -101,42 +114,47 @@ const Add = () => {
       Alert.alert("Upload failed", error.message);
     }
   };
+
   return (
     <KeyboardAwareScrollView
-      contentContainerStyle={{
-        flexGrow: 1,
-        justifyContent: "center",
-        padding: 10,
-      }}
-      extraScrollHeight={Platform.OS === "ios" ? 100 : 80} // Adjust height for better visibility
-      enableOnAndroid={true} // Fix for Android
+      contentContainerStyle={[styles.scrollContainer, commonStyles.container]}
+      extraScrollHeight={Platform.OS === "ios" ? 100 : 80}
+      enableOnAndroid={true}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={Styles.container}>
-          <Text style={Styles.header}>Add New Listing</Text>
+        <View style={[styles.container, commonStyles.container]}>
+          <Text style={[styles.header, commonStyles.text]}>Create New Listing</Text>
+
           <TouchableOpacity
             onPress={pickImage}
-            style={{ height: "10%", width: "20%", marginBottom: "2%" }}
+            style={[styles.imagePickerContainer, commonStyles.card]}
           >
             {image ? (
-              <Image
-                source={{ uri: image }}
-                style={{ width: "100%", height: "100%", borderRadius: 10 }}
-              />
+              <Image source={{ uri: image }} style={styles.selectedImage} />
             ) : (
-              <Image
-                source={require("../../assets/images/place.jpg")}
-                style={{ width: "100%", height: "100%", borderRadius: 10 }}
-              />
+              <View style={[
+                styles.imagePlaceholder,
+                Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+              ]}>
+                <MaterialIcons 
+                  name="add-a-photo" 
+                  size={40} 
+                  color={getOppositeColor(colorShades, "jet", "white")} 
+                />
+                <Text style={[styles.imagePlaceholderText, commonStyles.text]}>
+                  Add Photos
+                </Text>
+              </View>
             )}
           </TouchableOpacity>
+
           <Formik
             initialValues={{
               title: "",
               name: "",
               desc: "",
               category: "Furniture",
-              address: "",
+              address: address ? address.formattedAddress : "",
               image: "",
               username: "",
               useremail: "",
@@ -150,11 +168,11 @@ const Add = () => {
             validate={(values) => {
               const err = {};
               if (
-                !values.title &&
-                !values.name &&
-                !values.desc &&
-                !values.category &&
-                !values.price &&
+                !values.title ||
+                !values.name ||
+                !values.desc ||
+                !values.category ||
+                !values.price ||
                 !values.address
               ) {
                 ToastAndroid.show(
@@ -166,72 +184,124 @@ const Add = () => {
             }}
           >
             {({ handleChange, handleBlur, handleSubmit, values }) => (
-              <View style={Styles.formContainer}>
-                <TextInput
-                  style={Styles.input}
-                  placeholder="Title"
-                  value={values.title}
-                  onChangeText={handleChange("title")}
-                  placeholderTextColor="#666"
-                />
-                <TextInput
-                  style={Styles.input}
-                  placeholder="Name"
-                  value={values.name}
-                  onChangeText={handleChange("name")}
-                  placeholderTextColor="#666"
-                />
-                <TextInput
-                  style={[Styles.input, Styles.descInput]}
-                  placeholder="Description"
-                  value={values.desc}
-                  onChangeText={handleChange("desc")}
-                  multiline={true}
-                  numberOfLines={3}
-                  placeholderTextColor="#666"
-                />
-                <View style={Styles.pickerContainer}>
-                  <Picker
-                    selectedValue={values.category}
-                    onValueChange={handleChange("category")}
-                    style={Styles.picker}
-                  >
-                    {categorylist &&
-                      categorylist.map((Item, index) => {
-                        return (
-                          <Picker.Item
-                            key={index}
-                            value={Item.Name}
-                            label={Item.Name}
-                          />
-                        );
-                      })}
-                  </Picker>
+              <View style={styles.formContainer}>
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, commonStyles.text]}>Title</Text>
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      commonStyles.input,
+                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                    ]}
+                    placeholder="Enter listing title"
+                    value={values.title}
+                    onChangeText={handleChange("title")}
+                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                  />
                 </View>
-                <TextInput
-                  style={Styles.input}
-                  placeholder="Price"
-                  value={values.price}
-                  keyboardType="number-pad"
-                  onChangeText={handleChange("price")}
-                  placeholderTextColor="#666"
-                />
-                <TextInput
-                  style={Styles.input}
-                  placeholder="Address"
-                  value={values.address}
-                  onChangeText={handleChange("address")}
-                  placeholderTextColor="#666"
-                />
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, commonStyles.text]}>Name</Text>
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      commonStyles.input,
+                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                    ]}
+                    placeholder="Your name"
+                    value={values.name}
+                    onChangeText={handleChange("name")}
+                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, commonStyles.text]}>Description</Text>
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      commonStyles.input, 
+                      { height: 100 },
+                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                    ]}
+                    placeholder="Describe your item"
+                    value={values.desc}
+                    onChangeText={handleChange("desc")}
+                    multiline
+                    numberOfLines={4}
+                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, commonStyles.text]}>Category</Text>
+                  <View style={[
+                    styles.pickerContainer, 
+                    commonStyles.input,
+                    Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                  ]}>
+                    <Picker
+                      selectedValue={values.category}
+                      onValueChange={handleChange("category")}
+                      style={[styles.picker, { color: getOppositeColor(colorShades) }]}
+                      dropdownIconColor={getOppositeColor(colorShades)}
+                    >
+                      {categorylist.map((item, index) => (
+                        <Picker.Item
+                          key={index}
+                          label={item.Name}
+                          value={item.Name}
+                          color={Theme === "dark" ? "#fff" : "#000"}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, commonStyles.text]}>Price</Text>
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      commonStyles.input,
+                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                    ]}
+                    placeholder="Enter price"
+                    value={values.price}
+                    onChangeText={handleChange("price")}
+                    keyboardType="numeric"
+                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Text style={[styles.label, commonStyles.text]}>Location</Text>
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      commonStyles.input,
+                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                    ]}
+                    placeholder="Enter location"
+                    value={values.address}
+                    onChangeText={handleChange("address")}
+                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                  />
+                </View>
+
                 <TouchableOpacity
-                  style={Styles.submitButton}
+                  style={[
+                    styles.submitButton, 
+                    { opacity: Loading ? 0.7 : 1 },
+                    Theme === "dark" ? { backgroundColor: "#4A90E2" } : null
+                  ]}
                   onPress={handleSubmit}
                   disabled={Loading}
                 >
                   {Loading ? (
-                    <ActivityIndicator color={"white"} />
+                    <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text style={Styles.submitButtonText}>Submit Listing</Text>
+                    <Text style={styles.submitButtonText}>Create Listing</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -243,57 +313,82 @@ const Add = () => {
   );
 };
 
-const Styles = StyleSheet.create({
+const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
     padding: 20,
   },
   header: {
     fontSize: 24,
     fontWeight: "bold",
+    marginBottom: 20,
     textAlign: "center",
-    marginBottom: 30,
-    color: "#333",
+  },
+  imagePickerContainer: {
+    width: width - 40,
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 20,
+    overflow: "hidden",
+  },
+  selectedImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  imagePlaceholder: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#6c47ff",
+    borderStyle: "dashed",
+    borderRadius: 10,
+  },
+  imagePlaceholderText: {
+    marginTop: 10,
+    fontSize: 16,
   },
   formContainer: {
-    width: "100%",
+    flex: 1,
+  },
+  inputGroup: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
   },
   input: {
-    marginBottom: 15,
     borderWidth: 1,
-    borderColor: "#ddd",
-    width: "100%",
     borderRadius: 8,
-    padding: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     fontSize: 16,
-    backgroundColor: "#f9f9f9",
   },
-  descInput: {
-    height: 100,
-    textAlignVertical: "top",
+  pickerContainer: {
+    borderWidth: 1,
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  picker: {
+    height: 50,
+    width: "100%",
   },
   submitButton: {
     backgroundColor: "#6c47ff",
     padding: 15,
     borderRadius: 8,
-    marginTop: 10,
+    alignItems: "center",
+    marginTop: 20,
   },
   submitButtonText: {
     color: "#fff",
-    textAlign: "center",
     fontSize: 16,
-    fontWeight: "600",
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    marginBottom: 15,
-    backgroundColor: "#f9f9f9",
-  },
-  picker: {
-    width: "100%",
+    fontWeight: "bold",
   },
 });
 

@@ -2,11 +2,14 @@ import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import React from "react";
 import { router } from "expo-router";
 import Loginscreen from "@/components/Loginscreen";
+import { UseTheme } from "../../Context/ThemeContext";
 
 const Welcome = () => {
+  const { Theme, commonStyles, colorShades } = UseTheme();
+
   return (
     // Main container with full screen dimensions and relative positioning
-    <View style={styles.container}>
+    <View style={[styles.container, commonStyles.container]}>
       {/* Set relative positioning here */}
       {/* Hero image section taking up 52% of the screen height */}
       <Image
@@ -14,16 +17,36 @@ const Welcome = () => {
         style={styles.heroImage}
       />
       {/* White overlay container positioned at bottom half of screen */}
-      <View style={styles.overlay}>
+      <View
+        style={[
+          styles.overlay,
+          {
+            backgroundColor:
+              Theme === "dark" ? colorShades.blackShades.jet : "#fff",
+          },
+        ]}
+      >
         {/* Welcome text header section */}
         <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>Welcome to HavenMart!</Text>
+          <Text style={[styles.headerText, commonStyles.text]}>
+            Welcome to HavenMart!
+          </Text>
         </View>
 
         {/* Description text section */}
         <View style={styles.descriptionContainer}>
           <View style={styles.descriptionTextContainer}>
-            <Text style={styles.descriptionText}>
+            <Text
+              style={[
+                styles.descriptionText,
+                {
+                  color:
+                    Theme === "dark"
+                      ? colorShades.whiteShades.ghostWhite
+                      : "#666",
+                },
+              ]}
+            >
               Buy and sell with ease, connecting with trusted buyers and
               sellers. Discover amazing deals across various categories.
             </Text>
@@ -32,7 +55,10 @@ const Welcome = () => {
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={styles.signupButton}
+            style={[
+              styles.signupButton,
+              { backgroundColor: Theme === "dark" ? "#4A90E2" : "#6E75F4" },
+            ]}
             activeOpacity={0.5}
             onPress={() => router.push("/register")}
           >
@@ -40,11 +66,32 @@ const Welcome = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.signinButton}
+            style={[
+              styles.signinButton,
+              {
+                backgroundColor: Theme === "dark" ? "transparent" : "#fff",
+                borderColor:
+                  Theme === "dark"
+                    ? colorShades.whiteShades.ghostWhite
+                    : "#6E75F4",
+              },
+            ]}
             activeOpacity={0.5}
             onPress={() => router.push("/login")}
           >
-            <Text style={styles.signinButtonText}>Sign in</Text>
+            <Text
+              style={[
+                styles.signinButtonText,
+                {
+                  color:
+                    Theme === "dark"
+                      ? colorShades.whiteShades.ghostWhite
+                      : "#6E75F4",
+                },
+              ]}
+            >
+              Sign in
+            </Text>
           </TouchableOpacity>
 
           <View style={styles.spacer}></View>
@@ -71,72 +118,62 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: "50%",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    backgroundColor: "white",
+    height: "55%",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    padding: 20,
   },
   headerContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    height: "20%",
-    backgroundColor: "white",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    marginTop: 20,
+    marginBottom: 10,
   },
   headerText: {
-    fontSize: 25,
+    fontSize: 28,
     fontWeight: "bold",
-    alignSelf: "center",
-  },
-  descriptionContainer: {
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "white",
-  },
-  descriptionTextContainer: {
-    width: "50%",
-    paddingBottom: "2%",
-    paddingTop: "2%",
-  },
-  descriptionText: {
     textAlign: "center",
   },
-  buttonContainer: {
+  descriptionContainer: {
     alignItems: "center",
-    marginTop: "5%",
-    gap: 16,
+    marginBottom: 30,
+  },
+  descriptionTextContainer: {
+    width: "90%",
+  },
+  descriptionText: {
+    fontSize: 16,
+    textAlign: "center",
+    lineHeight: 24,
+  },
+  buttonContainer: {
+    width: "100%",
+    alignItems: "center",
   },
   signupButton: {
-    backgroundColor: "#6E75F4",
-    width: "70%",
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 12,
+    width: "100%",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   signupButtonText: {
-    color: "white",
-    fontWeight: "bold",
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
   },
   signinButton: {
-    width: "70%",
-    height: 48,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 12,
+    width: "100%",
+    padding: 15,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#6E75F4",
-    marginTop: "5%",
+    marginBottom: 10,
   },
   signinButtonText: {
-    color: "#6E75F4",
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
   },
   spacer: {
-    width: "70%",
+    height: 20,
   },
 });
 

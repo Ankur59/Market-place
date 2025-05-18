@@ -7,7 +7,8 @@ const ProfileCards = ({ icons, text, action }) => {
   const { Theme, getOppositeColor, colorShades, getSameColor } = UseTheme();
 
   return (
-    <View
+    <TouchableOpacity
+      onPress={action}
       style={{
         backgroundColor: getSameColor(colorShades),
         paddingVertical: "3%",
@@ -39,7 +40,7 @@ const ProfileCards = ({ icons, text, action }) => {
           color={getOppositeColor(colorShades, "jet", "white")}
         />
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 };
 

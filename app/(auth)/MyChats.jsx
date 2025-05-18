@@ -19,6 +19,7 @@ import {
 import { app } from "../../firebaseconfig";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { UseTheme } from "../../Context/ThemeContext";
 
 const MyChats = () => {
   const { user, isLoaded } = useUser();
@@ -27,6 +28,7 @@ const MyChats = () => {
   const username = user?.primaryEmailAddress?.emailAddress;
   const db = getFirestore(app);
   const navigation = useNavigation();
+  const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
 
   // Use useFocusEffect to refresh data when the screen comes into focus
   useFocusEffect(
@@ -134,7 +136,6 @@ const MyChats = () => {
   };
 
   const renderChatItem = ({ item }) => {
-    // Get partner email from participants, excluding current user
     const partnerEmail =
       item.participants?.find((email) => email !== username) ||
       item.otherUserEmail ||
@@ -143,31 +144,75 @@ const MyChats = () => {
     return (
       <TouchableOpacity
         onPress={() => navigateToChat(item)}
-        style={styles.chatItem}
+        style={[styles.chatItem, commonStyles.card]}
       >
-        <View style={styles.avatar}>
+        <View
+          style={[
+            styles.avatar,
+            { backgroundColor: Theme === "dark" ? "#4A90E2" : "#6c47ff" },
+          ]}
+        >
           <Text style={styles.avatarText}>{getInitials(partnerEmail)}</Text>
         </View>
 
         <View style={styles.chatContent}>
           <View style={styles.headerRow}>
-            <Text style={styles.emailText} numberOfLines={1}>
+            <Text
+              style={[styles.emailText, commonStyles.text]}
+              numberOfLines={1}
+            >
               {partnerEmail}
             </Text>
-            <Text style={styles.timeText}>
+            <Text
+              style={[
+                styles.timeText,
+                {
+                  color:
+                    Theme === "dark"
+                      ? colorShades.whiteShades.ghostWhite + "99"
+                      : getOppositeColor(colorShades, "dimGray", "dimGray"),
+                },
+              ]}
+            >
               {formatTimeAgo(item.lastUpdated)}
             </Text>
           </View>
 
           <View style={styles.messageContainer}>
-            <Text style={styles.messageText} numberOfLines={1}>
+            <Text
+              style={[
+                styles.messageText,
+                {
+                  color:
+                    Theme === "dark"
+                      ? colorShades.whiteShades.ghostWhite + "CC"
+                      : getOppositeColor(colorShades, "dimGray", "dimGray"),
+                },
+              ]}
+              numberOfLines={1}
+            >
               {item.lastMessage}
             </Text>
           </View>
 
           {item.productName && (
-            <View style={styles.productBadge}>
-              <Text style={styles.productText}>
+            <View
+              style={[
+                styles.productBadge,
+                { backgroundColor: Theme === "dark" ? "#2C3E50" : "#f3f4f6" },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.productText,
+                  {
+                    color:
+                      Theme === "dark"
+                        ? colorShades.whiteShades.ghostWhite
+                        : getOppositeColor(colorShades),
+                  },
+                ]}
+              >
                 {item.productName}{" "}
                 {item.productPrice ? `- ₹${item.productPrice}` : ""}
               </Text>
@@ -180,33 +225,48 @@ const MyChats = () => {
 
   if (!isLoaded || loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+      <View style={[styles.loadingContainer, commonStyles.container]}>
+        <ActivityIndicator size="large" color="#6c47ff" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Messages</Text>
+    <View style={[styles.container, commonStyles.container]}>
+      <View
+        style={[
+          styles.header,
+          { borderBottomColor: Theme === "dark" ? "#333" : "#e5e7eb" },
+        ]}
+      >
+        <Text style={[styles.headerTitle, commonStyles.text]}>Messages</Text>
       </View>
 
       {chats.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Feather name="message-circle" size={60} color="#d1d5db" />
-          <Text style={styles.emptyTextMain}>No conversations yet</Text>
-          <Text style={styles.emptyTextSub}>
+          <Feather
+            name="message-circle"
+            size={60}
+            color={getOppositeColor(colorShades, "dimGray", "dimGray")}
+          />
+          <Text style={[styles.emptyTextMain, commonStyles.text]}>
+            No conversations yet
+          </Text>
+          <Text
+            style={[
+              styles.emptyTextSub,
+              { color: getOppositeColor(colorShades, "dimGray", "dimGray") },
+            ]}
+          >
             When you start chatting with sellers or buyers, you'll see them here
           </Text>
         </View>
       ) : (
         <FlatList
           data={chats}
-          keyExtractor={(item) => item.id}
           renderItem={renderChatItem}
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.chatList}
         />
       )}
     </View>
@@ -216,55 +276,42 @@ const MyChats = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f9fafb",
-  },
-  header: {
-    padding: 16,
-    paddingTop: 24,
-    backgroundColor: "#ffffff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1f2937",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f9fafb",
   },
-  listContainer: {
+  header: {
+    padding: 16,
+    borderBottomWidth: 1,
+    marginBottom: 8,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  chatList: {
     padding: 16,
   },
   chatItem: {
-    marginBottom: 12,
-    padding: 12,
-    backgroundColor: "#ffffff",
-    borderRadius: 12,
     flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    padding: 12,
+    marginBottom: 8,
+    borderRadius: 12,
   },
   avatar: {
-    height: 48,
-    width: 48,
-    borderRadius: 24,
-    backgroundColor: "#dbeafe",
-    alignItems: "center",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   avatarText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#3b82f6",
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
   },
   chatContent: {
     flex: 1,
@@ -273,54 +320,47 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 4,
   },
   emailText: {
-    fontWeight: "600",
-    fontSize: 16,
-    color: "#1f2937",
     flex: 1,
+    fontSize: 16,
+    fontWeight: "600",
     marginRight: 8,
   },
   timeText: {
     fontSize: 12,
-    color: "#9ca3af",
   },
   messageContainer: {
-    marginTop: 4,
+    marginBottom: 4,
   },
   messageText: {
-    color: "#6b7280",
     fontSize: 14,
   },
   productBadge: {
-    marginTop: 6,
-    backgroundColor: "#f3f4f6",
-    paddingVertical: 2,
     paddingHorizontal: 8,
-    borderRadius: 6,
+    paddingVertical: 4,
+    borderRadius: 12,
     alignSelf: "flex-start",
   },
   productText: {
     fontSize: 12,
     fontWeight: "500",
-    color: "#4b5563",
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    padding: 20,
   },
   emptyTextMain: {
-    marginTop: 16,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
-    color: "#9ca3af",
+    marginTop: 16,
+    marginBottom: 8,
   },
   emptyTextSub: {
-    marginTop: 8,
     fontSize: 14,
-    color: "#9ca3af",
     textAlign: "center",
   },
 });

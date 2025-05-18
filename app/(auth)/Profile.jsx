@@ -171,7 +171,7 @@ const Profile = () => {
           />
         }
         text={"My Chats"}
-        action={() => redir("/ChatList")}
+        action={() => redir("/MyChats")}
       />
     </View>
   );

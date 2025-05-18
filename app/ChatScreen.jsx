@@ -10,9 +10,11 @@ import {
   StyleSheet,
   SafeAreaView,
   Keyboard,
+  StatusBar,
+  Dimensions,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
+import { useRoute, useNavigation } from "@react-navigation/native";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useUser } from "@clerk/clerk-expo";
 import { db } from "../firebaseconfig";
 import {
@@ -27,18 +29,23 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { Image } from "expo-image";
+import { BlurView } from "expo-blur";
+import { UseTheme } from "../Context/ThemeContext";
+
+const { width } = Dimensions.get("window");
 
 const ChatScreen = () => {
   const route = useRoute();
+  const navigation = useNavigation();
   const { user, isLoaded } = useUser();
   const { SellerId, item, buyerId } = route.params;
   const flatListRef = useRef(null);
+  const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
 
-  const [messages, setMessages] = useState([]); // State for messages
-  const [messageInput, setMessageInput] = useState(""); // State for input field
+  const [messages, setMessages] = useState([]);
+  const [messageInput, setMessageInput] = useState("");
   const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-  //   Function to initialilze chat if not exists on firebase
   const usermail = user?.primaryEmailAddress?.emailAddress;
 
   const createChatIfNotExists = async () => {
@@ -195,7 +202,7 @@ const ChatScreen = () => {
       timestamp: serverTimestamp(),
     });
 
-    setMessageInput(""); // Clear input field after sending
+    setMessageInput("");
   };
 
   const dismissKeyboard = () => {
@@ -203,102 +210,209 @@ const ChatScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        { backgroundColor: Theme === "dark" ? "#1a1a1a" : "#6c47ff" },
+      ]}
+    >
+      <StatusBar
+        barStyle={Theme === "dark" ? "light-content" : "light-content"}
+      />
       <KeyboardAvoidingView
-        style={styles.container}
+        style={[
+          styles.container,
+          { backgroundColor: Theme === "dark" ? "#121212" : "#f8f9fa" },
+        ]}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-        contentContainerStyle={{ flex: 1 }}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              minWidth: 250,
-              maxWidth: 260,
-              alignItems: "center",
-            }}
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: Theme === "dark" ? "#1a1a1a" : "#6c47ff" },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
           >
-            <View>
-              <Image
-                source={{ uri: item.userimage }}
-                style={{ width: 40, height: 40, borderRadius: 20 }}
-              />
-            </View>
+            <Ionicons name="arrow-back" size={22} color="#fff" />
+          </TouchableOpacity>
 
-            <View style={{marginTop:"10%"}}>
-              <View style={{ justifyContent: "center", alignItems: "center" }}>
-                <Text>Product name</Text>
-              </View>
-              <Text style={styles.headerTitle}>{item.name}</Text>
+          <View style={styles.headerContent}>
+            <Image
+              source={{ uri: item.userimage }}
+              style={styles.profileImage}
+              contentFit="cover"
+            />
+            <View style={styles.headerInfo}>
+              <Text style={styles.headerName} numberOfLines={1}>
+                {item.username || "Seller"}
+              </Text>
+              <Text style={styles.headerProduct} numberOfLines={1}>
+                {item.name}
+              </Text>
             </View>
           </View>
         </View>
+
+        {/* Warning Banner */}
         <View
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+          style={[
+            styles.warningBanner,
+            { backgroundColor: Theme === "dark" ? "#2C3E50" : "#fff" },
+          ]}
         >
-          <Text style={{ color: "grey" }}>
-            Don't Share any sensitive information in this chat
+          <MaterialIcons
+            name="security"
+            size={16}
+            color={Theme === "dark" ? "#A0AEC0" : "#666"}
+          />
+          <Text
+            style={[
+              styles.warningText,
+              { color: Theme === "dark" ? "#A0AEC0" : "#666" },
+            ]}
+          >
+            Don't share sensitive information in this chat
           </Text>
         </View>
 
-        {/* Message List */}
-        <FlatList
-          ref={flatListRef}
-          data={messages} // The messages from Firestore
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.messageBubble,
-                item.sender === usermail
-                  ? styles.myMessage
-                  : styles.theirMessage,
-              ]}
-            >
-              <Text style={styles.messageText}>{item.data}</Text>
-              <Text style={styles.timeText}>
-                {item.timestamp?.seconds
-                  ? new Date(item.timestamp.seconds * 1000).toLocaleTimeString()
-                  : "Sending..."}
-              </Text>
-            </View>
-          )}
-          keyExtractor={(item, index) => index.toString()}
-          contentContainerStyle={styles.messagesList}
-          onContentSizeChange={() => {
-            if (flatListRef.current && messages.length > 0) {
-              flatListRef.current.scrollToEnd({ animated: false });
-            }
-          }}
-          onLayout={() => {
-            if (flatListRef.current && messages.length > 0) {
-              flatListRef.current.scrollToEnd({ animated: false });
-            }
-          }}
-          onScrollBeginDrag={dismissKeyboard}
-        />
+        {/* Messages List */}
+        <TouchableOpacity
+          activeOpacity={1}
+          style={[
+            styles.messagesList,
+            { backgroundColor: Theme === "dark" ? "#121212" : "#fff" },
+          ]}
+          onPress={dismissKeyboard}
+        >
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            renderItem={({ item, index }) => {
+              const isCurrentUser = item.sender === usermail;
+              const showTimestamp = true;
+
+              return (
+                <View
+                  style={[
+                    styles.messageContainer,
+                    isCurrentUser
+                      ? styles.currentUserMessage
+                      : styles.otherUserMessage,
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.messageBubble,
+                      isCurrentUser
+                        ? [
+                            styles.currentUserBubble,
+                            {
+                              backgroundColor:
+                                Theme === "dark" ? "#4A90E2" : "#6c47ff",
+                            },
+                          ]
+                        : [
+                            styles.otherUserBubble,
+                            {
+                              backgroundColor:
+                                Theme === "dark" ? "#2C3E50" : "#f0f0f0",
+                            },
+                          ],
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.messageText,
+                        {
+                          color: isCurrentUser
+                            ? "#fff"
+                            : Theme === "dark"
+                            ? "#fff"
+                            : "#2d3748",
+                        },
+                      ]}
+                    >
+                      {item.data}
+                    </Text>
+                    {showTimestamp && item.timestamp && (
+                      <Text
+                        style={[
+                          styles.timestampText,
+                          {
+                            color: isCurrentUser
+                              ? "rgba(255, 255, 255, 0.7)"
+                              : Theme === "dark"
+                              ? "rgba(255, 255, 255, 0.7)"
+                              : "rgba(45, 55, 72, 0.7)",
+                          },
+                        ]}
+                      >
+                        {item.timestamp.toDate().toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              );
+            }}
+            keyExtractor={(item, index) => index.toString()}
+            contentContainerStyle={styles.messagesContainer}
+            showsVerticalScrollIndicator={false}
+          />
+        </TouchableOpacity>
 
         {/* Input Area */}
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              backgroundColor: Theme === "dark" ? "#1a1a1a" : "#fff",
+              borderTopColor: Theme === "dark" ? "#2C3E50" : "#edf2f7",
+            },
+          ]}
+        >
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                backgroundColor: Theme === "dark" ? "#2C3E50" : "#f8f9fa",
+                color: Theme === "dark" ? "#fff" : "#2d3748",
+              },
+            ]}
             placeholder="Type a message..."
-            multiline
             value={messageInput}
             onChangeText={setMessageInput}
+            multiline
             maxHeight={100}
+            placeholderTextColor={Theme === "dark" ? "#A0AEC0" : "#666"}
           />
           <TouchableOpacity
-            style={styles.sendButton}
+            style={[
+              styles.sendButton,
+              !messageInput.trim() && styles.sendButtonDisabled,
+              {
+                backgroundColor: messageInput.trim()
+                  ? Theme === "dark"
+                    ? "#4A90E2"
+                    : "#6c47ff"
+                  : "#E2E8F0",
+              },
+            ]}
             onPress={handleSendMessage}
             disabled={!messageInput.trim()}
           >
-            <Ionicons name="send" size={24} color="#fff" />
+            <Ionicons
+              name="send"
+              size={20}
+              color={messageInput.trim() ? "#fff" : "#A0AEC0"}
+            />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -309,81 +423,140 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#6c47ff",
   },
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#f8f9fa",
   },
   header: {
-    padding: 16,
+    backgroundColor: "#6c47ff",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    height:
+      Platform.OS === "android" ? 56 + (StatusBar.currentHeight || 0) : 56,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight || 0 : 0,
+  },
+  backButton: {
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
+  },
+  headerContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  profileImage: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    marginRight: 10,
+  },
+  headerInfo: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  headerName: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 1,
+  },
+  headerProduct: {
+    color: "#fff",
+    fontSize: 12,
+    opacity: 0.9,
+  },
+  warningBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 8,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderBottomColor: "#edf2f7",
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
+  warningText: {
+    marginLeft: 6,
+    color: "#666",
+    fontSize: 12,
   },
   messagesList: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  messagesContainer: {
     padding: 16,
-    flexGrow: 1,
+    paddingBottom: 32,
+  },
+  messageContainer: {
+    marginVertical: 4,
+    maxWidth: "80%",
+  },
+  currentUserMessage: {
+    alignSelf: "flex-end",
+  },
+  otherUserMessage: {
+    alignSelf: "flex-start",
   },
   messageBubble: {
-    maxWidth: "75%",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginBottom: 10,
+    borderRadius: 16,
+    padding: 12,
+    maxWidth: "100%",
   },
-  myMessage: {
-    alignSelf: "flex-end",
+  currentUserBubble: {
     backgroundColor: "#6c47ff",
+    borderBottomRightRadius: 4,
   },
-  theirMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "blue",
+  otherUserBubble: {
+    backgroundColor: "#f0f0f0",
+    borderBottomLeftRadius: 4,
   },
   messageText: {
-    fontSize: 16,
+    fontSize: 15,
+    lineHeight: 20,
     color: "#fff",
   },
-  timeText: {
-    fontSize: 12,
+  timestampText: {
+    fontSize: 11,
     color: "rgba(255, 255, 255, 0.7)",
-    alignSelf: "flex-end",
     marginTop: 4,
+    alignSelf: "flex-end",
   },
   inputContainer: {
     flexDirection: "row",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
+    alignItems: "flex-end",
+    padding: 12,
     backgroundColor: "#fff",
-    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#edf2f7",
   },
   input: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#f8f9fa",
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
+    marginRight: 8,
+    fontSize: 16,
     maxHeight: 100,
+    color: "#2d3748",
   },
   sendButton: {
-    marginLeft: 10,
     backgroundColor: "#6c47ff",
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
+  },
+  sendButtonDisabled: {
+    backgroundColor: "#E2E8F0",
   },
 });
 

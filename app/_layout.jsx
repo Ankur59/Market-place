@@ -7,6 +7,7 @@ import SyncUserToFirestore from "../components/Syncwithfirebase";
 import { useUserRole, UserRoleProvider } from "../Context/RoleContext";
 import { useEffect } from "react";
 import { ThemeProvider } from "../Context/ThemeContext";
+import { LocationProvider } from "../Context/LocationContext";
 
 const publishableKey =
   "pk_test_ZXZvbHZlZC1maXJlZmx5LTUxLmNsZXJrLmFjY291bnRzLmRldiQ";
@@ -56,7 +57,9 @@ export default function RootLayout() {
       <UserRoleProvider>
         <ContextProvider>
           <ThemeProvider>
-            <AppContent />
+            <LocationProvider>
+              <AppContent />
+            </LocationProvider>
           </ThemeProvider>
         </ContextProvider>
       </UserRoleProvider>

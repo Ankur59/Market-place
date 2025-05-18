@@ -4,9 +4,12 @@ import { FlatList } from "react-native";
 import { hp, wp } from "../common/helper";
 import ProductCard from "./Card";
 import { useNavigation } from "@react-navigation/native";
+import { UseTheme } from "../Context/ThemeContext";
 
 const LatestItems = ({ source }) => {
   const navigation = useNavigation();
+  const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
+
   return (
     <View
       style={{
@@ -15,7 +18,9 @@ const LatestItems = ({ source }) => {
         alignItems: "center",
       }}
     >
-      <Text style={{ fontWeight: 600, fontSize: 15 }}>Latest Items</Text>
+      <Text style={[{ fontWeight: 600, fontSize: 15 }, commonStyles.text]}>
+        Latest Items
+      </Text>
       <FlatList
         numColumns={2}
         data={source}
