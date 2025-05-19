@@ -22,7 +22,9 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.havenmart.app",
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -55,8 +57,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "7bac804d-0376-427e-9365-ea39466e95fb"
+        "projectId": "aff8bb9f-7019-493c-a0c1-b7ef3ae5dc55"
       }
-    }
+    },
+    "owner": "ankur002"
   }
 }
