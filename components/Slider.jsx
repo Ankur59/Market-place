@@ -10,9 +10,9 @@ const Slider = ({ source }) => {
   //Reference to pass to flatlist for autoscroling
   const flatlistref = useRef();
   const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
-  useEffect(() => {
-    console.log(Theme);
-  }, [Theme]);
+  // useEffect(() => {
+  //   console.log(Theme);
+  // }, [Theme]);
   //Each time user scrolls the image or it is auto scroll then this use effect will run because any scroll will change the currentIndex
   useEffect(() => {
     //Time interval to do automatic on basis of current index of scrolled value
