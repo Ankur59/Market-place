@@ -123,7 +123,9 @@ const Add = () => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={[styles.container, commonStyles.container]}>
-          <Text style={[styles.header, commonStyles.text]}>Create New Listing</Text>
+          <Text style={[styles.header, commonStyles.text]}>
+            Create New Listing
+          </Text>
 
           <TouchableOpacity
             onPress={pickImage}
@@ -132,14 +134,18 @@ const Add = () => {
             {image ? (
               <Image source={{ uri: image }} style={styles.selectedImage} />
             ) : (
-              <View style={[
-                styles.imagePlaceholder,
-                Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
-              ]}>
-                <MaterialIcons 
-                  name="add-a-photo" 
-                  size={40} 
-                  color={getOppositeColor(colorShades, "jet", "white")} 
+              <View
+                style={[
+                  styles.imagePlaceholder,
+                  Theme === "dark"
+                    ? { borderColor: colorShades.whiteShades.ghostWhite }
+                    : null,
+                ]}
+              >
+                <MaterialIcons
+                  name="add-a-photo"
+                  size={40}
+                  color={getOppositeColor(colorShades, "jet", "white")}
                 />
                 <Text style={[styles.imagePlaceholderText, commonStyles.text]}>
                   Add Photos
@@ -162,11 +168,6 @@ const Add = () => {
               sellerimage: "",
             }}
             onSubmit={(values, { resetForm }) => {
-              image_submit(values);
-              resetForm();
-            }}
-            validate={(values) => {
-              const err = {};
               if (
                 !values.title ||
                 !values.name ||
@@ -179,9 +180,28 @@ const Add = () => {
                   "All Fields are Required",
                   ToastAndroid.SHORT
                 );
+              } else {
+                image_submit(values);
+                resetForm();
               }
-              return err;
             }}
+            // validate={(values) => {
+            //   const err = {};
+            //   if (
+            //     !values.title ||
+            //     !values.name ||
+            //     !values.desc ||
+            //     !values.category ||
+            //     !values.price ||
+            //     !values.address
+            //   ) {
+            //     ToastAndroid.show(
+            //       "All Fields are Required",
+            //       ToastAndroid.SHORT
+            //     );
+            //   }
+            //   return err;
+            // }}
           >
             {({ handleChange, handleBlur, handleSubmit, values }) => (
               <View style={styles.formContainer}>
@@ -189,14 +209,20 @@ const Add = () => {
                   <Text style={[styles.label, commonStyles.text]}>Title</Text>
                   <TextInput
                     style={[
-                      styles.input, 
+                      styles.input,
                       commonStyles.input,
-                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                      Theme === "dark"
+                        ? { borderColor: colorShades.whiteShades.ghostWhite }
+                        : null,
                     ]}
                     placeholder="Enter listing title"
                     value={values.title}
                     onChangeText={handleChange("title")}
-                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                    placeholderTextColor={
+                      Theme === "dark"
+                        ? colorShades.whiteShades.ghostWhite + "80"
+                        : getOppositeColor(colorShades, "dimGray", "dimGray")
+                    }
                   />
                 </View>
 
@@ -204,46 +230,69 @@ const Add = () => {
                   <Text style={[styles.label, commonStyles.text]}>Name</Text>
                   <TextInput
                     style={[
-                      styles.input, 
+                      styles.input,
                       commonStyles.input,
-                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                      Theme === "dark"
+                        ? { borderColor: colorShades.whiteShades.ghostWhite }
+                        : null,
                     ]}
                     placeholder="Your name"
                     value={values.name}
                     onChangeText={handleChange("name")}
-                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                    placeholderTextColor={
+                      Theme === "dark"
+                        ? colorShades.whiteShades.ghostWhite + "80"
+                        : getOppositeColor(colorShades, "dimGray", "dimGray")
+                    }
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, commonStyles.text]}>Description</Text>
+                  <Text style={[styles.label, commonStyles.text]}>
+                    Description
+                  </Text>
                   <TextInput
                     style={[
-                      styles.input, 
-                      commonStyles.input, 
+                      styles.input,
+                      commonStyles.input,
                       { height: 100 },
-                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                      Theme === "dark"
+                        ? { borderColor: colorShades.whiteShades.ghostWhite }
+                        : null,
                     ]}
                     placeholder="Describe your item"
                     value={values.desc}
                     onChangeText={handleChange("desc")}
                     multiline
                     numberOfLines={4}
-                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                    placeholderTextColor={
+                      Theme === "dark"
+                        ? colorShades.whiteShades.ghostWhite + "80"
+                        : getOppositeColor(colorShades, "dimGray", "dimGray")
+                    }
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, commonStyles.text]}>Category</Text>
-                  <View style={[
-                    styles.pickerContainer, 
-                    commonStyles.input,
-                    Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
-                  ]}>
+                  <Text style={[styles.label, commonStyles.text]}>
+                    Category
+                  </Text>
+                  <View
+                    style={[
+                      styles.pickerContainer,
+                      commonStyles.input,
+                      Theme === "dark"
+                        ? { borderColor: colorShades.whiteShades.ghostWhite }
+                        : null,
+                    ]}
+                  >
                     <Picker
                       selectedValue={values.category}
                       onValueChange={handleChange("category")}
-                      style={[styles.picker, { color: getOppositeColor(colorShades) }]}
+                      style={[
+                        styles.picker,
+                        { color: getOppositeColor(colorShades) },
+                      ]}
                       dropdownIconColor={getOppositeColor(colorShades)}
                     >
                       {categorylist.map((item, index) => (
@@ -251,7 +300,8 @@ const Add = () => {
                           key={index}
                           label={item.Name}
                           value={item.Name}
-                          color={Theme === "dark" ? "#fff" : "#000"}
+                          // color={Theme === "dark" ? "white" : "black"}
+                          
                         />
                       ))}
                     </Picker>
@@ -262,38 +312,52 @@ const Add = () => {
                   <Text style={[styles.label, commonStyles.text]}>Price</Text>
                   <TextInput
                     style={[
-                      styles.input, 
+                      styles.input,
                       commonStyles.input,
-                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                      Theme === "dark"
+                        ? { borderColor: colorShades.whiteShades.ghostWhite }
+                        : null,
                     ]}
                     placeholder="Enter price"
                     value={values.price}
                     onChangeText={handleChange("price")}
                     keyboardType="numeric"
-                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                    placeholderTextColor={
+                      Theme === "dark"
+                        ? colorShades.whiteShades.ghostWhite + "80"
+                        : getOppositeColor(colorShades, "dimGray", "dimGray")
+                    }
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.label, commonStyles.text]}>Location</Text>
+                  <Text style={[styles.label, commonStyles.text]}>
+                    Location
+                  </Text>
                   <TextInput
                     style={[
-                      styles.input, 
+                      styles.input,
                       commonStyles.input,
-                      Theme === "dark" ? { borderColor: colorShades.whiteShades.ghostWhite } : null
+                      Theme === "dark"
+                        ? { borderColor: colorShades.whiteShades.ghostWhite }
+                        : null,
                     ]}
                     placeholder="Enter location"
                     value={values.address}
                     onChangeText={handleChange("address")}
-                    placeholderTextColor={Theme === "dark" ? colorShades.whiteShades.ghostWhite + "80" : getOppositeColor(colorShades, "dimGray", "dimGray")}
+                    placeholderTextColor={
+                      Theme === "dark"
+                        ? colorShades.whiteShades.ghostWhite + "80"
+                        : getOppositeColor(colorShades, "dimGray", "dimGray")
+                    }
                   />
                 </View>
 
                 <TouchableOpacity
                   style={[
-                    styles.submitButton, 
+                    styles.submitButton,
                     { opacity: Loading ? 0.7 : 1 },
-                    Theme === "dark" ? { backgroundColor: "#4A90E2" } : null
+                    Theme === "dark" ? { backgroundColor: "#4A90E2" } : null,
                   ]}
                   onPress={handleSubmit}
                   disabled={Loading}
