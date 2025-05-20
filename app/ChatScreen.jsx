@@ -13,6 +13,7 @@ import {
   StatusBar,
   Dimensions,
   Alert,
+  ScrollView,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -101,36 +102,15 @@ const ChatScreen = () => {
     }
   };
 
-  // Listen for keyboard events
+  // Update keyboard effect to be more reliable
   useEffect(() => {
-    const keyboardWillShowListener =
-      Platform.OS === "ios"
-        ? Keyboard.addListener("keyboardWillShow", () => {
-            setKeyboardVisible(true);
-            // Scroll to bottom when keyboard appears
-            if (flatListRef.current && messages.length > 0) {
-              flatListRef.current.scrollToEnd({ animated: true });
-            }
-          })
-        : null;
-
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
       () => {
         setKeyboardVisible(true);
-        // Scroll to bottom when keyboard appears
-        if (flatListRef.current && messages.length > 0) {
-          flatListRef.current.scrollToEnd({ animated: true });
-        }
+        scrollToBottom();
       }
     );
-
-    const keyboardWillHideListener =
-      Platform.OS === "ios"
-        ? Keyboard.addListener("keyboardWillHide", () => {
-            setKeyboardVisible(false);
-          })
-        : null;
 
     const keyboardDidHideListener = Keyboard.addListener(
       "keyboardDidHide",
@@ -140,12 +120,16 @@ const ChatScreen = () => {
     );
 
     return () => {
-      if (keyboardWillShowListener) keyboardWillShowListener.remove();
-      if (keyboardDidShowListener) keyboardDidShowListener.remove();
-      if (keyboardWillHideListener) keyboardWillHideListener.remove();
-      if (keyboardDidHideListener) keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
     };
   }, [messages.length]);
+
+  const scrollToBottom = () => {
+    if (flatListRef.current && messages.length > 0) {
+      flatListRef.current.scrollToEnd({ animated: true });
+    }
+  };
 
   // Fetch messages from Firestore
   useEffect(() => {
@@ -230,7 +214,7 @@ const ChatScreen = () => {
           styles.container,
           { backgroundColor: Theme === "dark" ? "#121212" : "#f8f9fa" },
         ]}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       >
         {/* Header */}
@@ -294,13 +278,11 @@ const ChatScreen = () => {
         </View>
 
         {/* Messages List */}
-        <TouchableOpacity
-          activeOpacity={1}
+        <View
           style={[
             styles.messagesList,
             { backgroundColor: Theme === "dark" ? "#121212" : "#fff" },
           ]}
-          onPress={dismissKeyboard}
         >
           <FlatList
             ref={flatListRef}
@@ -377,9 +359,15 @@ const ChatScreen = () => {
             }}
             keyExtractor={(item, index) => index.toString()}
             contentContainerStyle={styles.messagesContainer}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={true}
+            onContentSizeChange={scrollToBottom}
+            onLayout={scrollToBottom}
+            maintainVisibleContentPosition={{
+              minIndexForVisible: 0,
+              autoscrollToTopThreshold: 10,
+            }}
           />
-        </TouchableOpacity>
+        </View>
 
         {/* Input Area */}
         <View
@@ -506,6 +494,7 @@ const styles = StyleSheet.create({
   messagesContainer: {
     padding: 16,
     paddingBottom: 32,
+    flexGrow: 1,
   },
   messageContainer: {
     marginVertical: 4,
