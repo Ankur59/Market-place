@@ -163,7 +163,7 @@ const Home = () => {
         renderItem={({ item }) => (
           <ProductCard
             imageUrl={item.image}
-            name={item.name}
+            name={item.title}
             price={item.price}
             action={() => navigation.navigate("productDetails", { item })}
           />

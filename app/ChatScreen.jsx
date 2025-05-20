@@ -82,7 +82,7 @@ const ChatScreen = () => {
 
         await addDoc(messagesRef, {
           sender: usermail,
-          data: `I am interested in your ${item.name}`,
+          data: `I am interested in your ${item.title}`,
           timestamp: serverTimestamp(),
         });
 
@@ -252,7 +252,7 @@ const ChatScreen = () => {
                 {item.username || "Seller"}
               </Text>
               <Text style={styles.headerProduct} numberOfLines={1}>
-                {item.name}
+                {item.title}
               </Text>
             </View>
           </View>
