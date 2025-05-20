@@ -12,6 +12,7 @@ import {
   Keyboard,
   StatusBar,
   Dimensions,
+  Alert,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -48,8 +49,6 @@ const ChatScreen = () => {
   const currentUser = user?.fullName;
   const usermail = user?.primaryEmailAddress?.emailAddress;
 
-   console.log(item)
-
   const createChatIfNotExists = async () => {
     const buyer_id = buyerId;
     const seller_id = SellerId;
@@ -64,7 +63,7 @@ const ChatScreen = () => {
 
     const chatref = doc(db, "Chats", ChatId);
     const chatsnap = await getDoc(chatref);
- 
+
     try {
       // Initiates the first message as Hi
       if (!chatsnap.exists()) {
@@ -78,11 +77,11 @@ const ChatScreen = () => {
           SellerId: seller_id,
           docId: item.docId,
           buyer_id: buyer_id,
-          seller_name: item.username,
-          seller_image:item.userimage,
+          seller_name: item.seller_name,
+          seller_image: item.sellerimage,
           buyer_name: currentUser,
-          buyerimage:user.imageUrl,
-          title:item.title
+          buyerimage: user.imageUrl,
+          title: item.title,
         });
 
         const messagesRef = collection(db, "Chats", ChatId, "messages");
@@ -250,13 +249,20 @@ const ChatScreen = () => {
 
           <View style={styles.headerContent}>
             <Image
-              source={{ uri: currentUser===item.seller_name?item.buyerimage:item.sellerimage }}
+              source={{
+                uri:
+                  currentUser === item.seller_name
+                    ? item.buyerimage
+                    : item.sellerimage,
+              }}
               style={styles.profileImage}
               contentFit="cover"
             />
             <View style={styles.headerInfo}>
               <Text style={styles.headerName} numberOfLines={1}>
-                {currentUser===item.seller_name?item.buyer_name:item.seller_name}
+                {currentUser === item.seller_name
+                  ? item.buyer_name
+                  : item.seller_name}
               </Text>
               <Text style={styles.headerProduct} numberOfLines={1}>
                 {item.title}

@@ -15,6 +15,7 @@ import { useNavigation } from "expo-router";
 import { useUser } from "@clerk/clerk-expo";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { UseTheme } from "../Context/ThemeContext";
+import ImageView from "react-native-image-viewing";
 
 const ProductDetails = () => {
   const navigation = useNavigation();
@@ -22,6 +23,7 @@ const ProductDetails = () => {
   const { item } = route.params;
   const { user, isLoaded } = useUser();
   const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
+  const [Visible, SetVisible] = useState(false);
 
   // State to store share message and loading state
   const [shareMessage, setShareMessage] = useState("");
@@ -82,7 +84,16 @@ const ProductDetails = () => {
       ]}
     >
       <View>
-        <Image source={{ uri: item.image }} style={styles.image} />
+        <ImageView
+          images={[{ uri: item.image }]}
+          imageIndex={0}
+          visible={Visible}
+          animationType="slide"
+          onRequestClose={() => SetVisible(false)}
+        />
+        <TouchableOpacity onPress={() => SetVisible(true)}>
+          <Image source={{ uri: item.image }} style={styles.image} />
+        </TouchableOpacity>
         <View
           style={{
             position: "absolute",
