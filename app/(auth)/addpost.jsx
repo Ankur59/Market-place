@@ -156,10 +156,10 @@ const Add = () => {
               category: "Furniture",
               address: address ? address.formattedAddress : "",
               image: "",
-              username: "",
+              seller_name: "",
               useremail: "",
               price: "",
-              userimage: "",
+              sellerimage: "",
             }}
             onSubmit={(values, { resetForm }) => {
               image_submit(values);

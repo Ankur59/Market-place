@@ -32,7 +32,7 @@ const Myproducts = () => {
   const handleEdit = (item) => {
     setData({
       desc: item.desc,
-      name: item.name,
+      name: item.title,
       price: item.price,
     });
     setModalVisible(true);
@@ -163,7 +163,7 @@ const Myproducts = () => {
               <View>
                 <ProductCard
                   imageUrl={item.image}
-                  name={item.name}
+                  name={item.title}
                   price={item.price}
                   condition={CheckOwner(item.useremail)}
                   Ondelete={() => handledelete(item)}

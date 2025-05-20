@@ -73,6 +73,11 @@ const MyChats = () => {
             SellerId: data.SellerId || otherUserEmail,
             docId: data.docId || chatId,
             buyer_id: data.buyer_id || otherUserEmail,
+            sellerName:data.seller_name,
+            buyerName:data.buyer_name,
+            title:data.title,
+            sellerimage:data.seller_image,
+            buyerimage:data.buyerimage
 
             // Add any other fields needed for ChatScreen
           };
@@ -94,11 +99,17 @@ const MyChats = () => {
   };
 
   const navigateToChat = (item) => {
+ 
     // Prepare the navigation params to match the expected format in ChatScreen
     navigation.navigate("ChatScreen", {
       SellerId: item.SellerId,
       buyerId: item.buyer_id,
       item: {
+        seller_name: item.sellerName,
+        sellerimage:item.sellerimage,
+        buyer_name: item.buyerName,
+        buyerimage:item.buyerimage,
+        title:item.title,
         docId: item.docId || item.id,
         name: item.productName,
         price: item.productPrice,

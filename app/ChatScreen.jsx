@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { useUser } from "@clerk/clerk-expo";
+import { ClerkLoading, useUser } from "@clerk/clerk-expo";
 import { db } from "../firebaseconfig";
 import {
   addDoc,
@@ -45,8 +45,10 @@ const ChatScreen = () => {
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [keyboardVisible, setKeyboardVisible] = useState(false);
-
+  const currentUser = user?.fullName;
   const usermail = user?.primaryEmailAddress?.emailAddress;
+
+   console.log(item)
 
   const createChatIfNotExists = async () => {
     const buyer_id = buyerId;
@@ -62,7 +64,7 @@ const ChatScreen = () => {
 
     const chatref = doc(db, "Chats", ChatId);
     const chatsnap = await getDoc(chatref);
-
+ 
     try {
       // Initiates the first message as Hi
       if (!chatsnap.exists()) {
@@ -71,11 +73,16 @@ const ChatScreen = () => {
           lastMessage: "I am interested in your product!",
           lastUpdated: serverTimestamp(),
           participants: [buyer_id, seller_id],
-          productName: item.name,
+          productName: item.title,
           productPrice: item.price,
           SellerId: seller_id,
           docId: item.docId,
           buyer_id: buyer_id,
+          seller_name: item.username,
+          seller_image:item.userimage,
+          buyer_name: currentUser,
+          buyerimage:user.imageUrl,
+          title:item.title
         });
 
         const messagesRef = collection(db, "Chats", ChatId, "messages");
@@ -243,13 +250,13 @@ const ChatScreen = () => {
 
           <View style={styles.headerContent}>
             <Image
-              source={{ uri: item.userimage }}
+              source={{ uri: currentUser===item.seller_name?item.buyerimage:item.sellerimage }}
               style={styles.profileImage}
               contentFit="cover"
             />
             <View style={styles.headerInfo}>
               <Text style={styles.headerName} numberOfLines={1}>
-                {item.username || "Seller"}
+                {currentUser===item.seller_name?item.buyer_name:item.seller_name}
               </Text>
               <Text style={styles.headerProduct} numberOfLines={1}>
                 {item.title}
