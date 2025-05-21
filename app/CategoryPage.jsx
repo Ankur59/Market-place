@@ -17,6 +17,7 @@ import ProductCard from "../components/Card";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { UseTheme } from "../Context/ThemeContext";
+import { wp } from "../common/helper";
 
 const { width } = Dimensions.get("window");
 const SIDEBAR_WIDTH = 80; // Fixed width for sidebar
@@ -50,27 +51,6 @@ const CategoryPage = () => {
   const toRad = (value) => {
     return (value * Math.PI) / 180;
   };
-
-  useEffect(() => {
-    navigation.setOptions({
-      title: category.Name,
-      headerStyle: {
-        backgroundColor: Theme === "dark" ? "#1a1a1a" : "#6c47ff",
-      },
-      headerTintColor: "#fff",
-      headerTitleStyle: {
-        color: "white",
-      },
-      headerLeft: () => (
-        <TouchableOpacity
-          style={styles.headerButton}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-      ),
-    });
-  }, [Theme]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -209,8 +189,9 @@ const CategoryPage = () => {
           renderItem={({ item }) => (
             <ProductCard
               imageUrl={item.image}
-              name={item.name}
+              name={item.title}
               price={item.price}
+              width={wp(38)}
               action={() => navigation.navigate("productDetails", { item })}
             />
           )}

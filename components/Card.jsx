@@ -14,6 +14,8 @@ const ProductCard = ({
   condition,
   Ondelete,
   onEdit,
+  height,
+  width,
 }) => {
   const Wrapper = condition ? View : TouchableOpacity;
   const { Theme, commonStyles, getOppositeColor, colorShades } = UseTheme();
@@ -25,6 +27,8 @@ const ProductCard = ({
         {
           backgroundColor: Theme === "dark" ? "#2C3E50" : "white",
           shadowColor: Theme === "dark" ? "#000" : "#000",
+          height: height,
+          width: width,
         },
       ]}
       onPress={action}
@@ -93,7 +97,7 @@ const ProductCard = ({
       </View>
 
       {/* Product Info */}
-      <View style={styles.infoContainer}>
+      <View style={[styles.infoContainer]}>
         <Text
           style={[
             styles.name,

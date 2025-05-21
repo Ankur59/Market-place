@@ -87,8 +87,8 @@ const Add = () => {
 
       value.image = downloadurl;
       value.useremail = user.primaryEmailAddress.emailAddress;
-      value.username = user.fullName;
-      value.userimage = user.imageUrl;
+      value.seller_name = user.fullName;
+      value.sellerimage = user.imageUrl;
       value.customId = Date.now().toString();
 
       if (location) {
@@ -96,7 +96,7 @@ const Add = () => {
           latitude: location.latitude,
           longitude: location.longitude,
         };
-      }
+      } 
       if (address) {
         value.formattedAddress = address.formattedAddress;
         value.city = address.city;
@@ -301,7 +301,6 @@ const Add = () => {
                           label={item.Name}
                           value={item.Name}
                           // color={Theme === "dark" ? "white" : "black"}
-                          
                         />
                       ))}
                     </Picker>

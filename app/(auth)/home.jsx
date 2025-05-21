@@ -20,6 +20,7 @@ import { useLocation } from "../../Context/LocationContext";
 import { UseTheme } from "../../Context/ThemeContext";
 import ProductCard from "../../components/Card";
 import { useNavigation } from "@react-navigation/native";
+import { wp } from "../../common/helper";
 
 const { width } = Dimensions.get("window");
 
@@ -125,7 +126,8 @@ const Home = () => {
       {address && (
         <View style={[styles.locationContainer, commonStyles.card]}>
           <Text style={[styles.locationText, commonStyles.text]}>
-            📍 Showing items near {address.city}, {address.region}
+            📍 Showing items near {address.city}, {address.region}{" "}
+            {address.postalCode}
           </Text>
         </View>
       )}
@@ -161,12 +163,15 @@ const Home = () => {
         numColumns={2}
         ListHeaderComponent={ListHeader}
         renderItem={({ item }) => (
-          <ProductCard
-            imageUrl={item.image}
-            name={item.title}
-            price={item.price}
-            action={() => navigation.navigate("productDetails", { item })}
-          />
+          <View style={{ marginHorizontal: 5 }}>
+            <ProductCard
+              imageUrl={item.image}
+              name={item.title}
+              price={item.price}
+              action={() => navigation.navigate("productDetails", { item })}
+              width={wp(43)}
+            />
+          </View>
         )}
         keyExtractor={(item, index) => index.toString()}
         refreshControl={
