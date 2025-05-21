@@ -1,8 +1,8 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import React from "react";
 import { router } from "expo-router";
-import Loginscreen from "@/components/Loginscreen";
 import { UseTheme } from "../../Context/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
 
 const Welcome = () => {
   const { Theme, commonStyles, colorShades } = UseTheme();
@@ -10,7 +10,6 @@ const Welcome = () => {
   return (
     // Main container with full screen dimensions and relative positioning
     <View style={[styles.container, commonStyles.container]}>
-      {/* Set relative positioning here */}
       {/* Hero image section taking up 52% of the screen height */}
       <Image
         source={require("../../assets/images/login.jpg")}
@@ -94,6 +93,24 @@ const Welcome = () => {
             </Text>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={[
+              styles.adminButton,
+              {
+                backgroundColor: Theme === "dark" ? "#7c3aed" : "#7c3aed",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+              },
+            ]}
+            activeOpacity={0.5}
+            onPress={() => router.push("/adminLogin")}
+          >
+            <Ionicons name="shield-outline" size={18} color="white" />
+            <Text style={styles.signupButtonText}>Admin Login</Text>
+          </TouchableOpacity>
+
           <View style={styles.spacer}></View>
         </View>
       </View>
@@ -171,6 +188,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     textAlign: "center",
+  },
+  adminButton: {
+    width: "100%",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
   },
   spacer: {
     height: 20,
