@@ -1,9 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { UseTheme } from "../../Context/ThemeContext";
+import { useUser } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 
 const PublicLayout = () => {
   const { Theme, colorShades } = UseTheme();
+  const { user } = useUser();
+  const router = useRouter();
+
+  
 
   return (
     <Stack

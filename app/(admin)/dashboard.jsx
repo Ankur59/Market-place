@@ -13,9 +13,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "@clerk/clerk-expo";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseconfig";
+import { useAuth } from "@clerk/clerk-expo";
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { signOut } = useAuth();
   const { user } = useUser();
   const [totalPosts, setTotalPosts] = useState(0);
   const [categories, setCategories] = useState([]);
@@ -46,14 +48,7 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = async () => {
-    try {
-      // Remove admin status from AsyncStorage
-      await AsyncStorage.removeItem(`admin_${user.id}`);
-      // Redirect to welcome page
-      router.replace("/");
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
+    signOut();
   };
 
   const menuItems = [

@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { ThemeProvider } from "../Context/ThemeContext";
 import { LocationProvider } from "../Context/LocationContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import RoleBasedRedirect from "./RoleBasedRedirect";
 
 const publishableKey =
   "pk_test_ZXZvbHZlZC1maXJlZmx5LTUxLmNsZXJrLmFjY291bnRzLmRldiQ";
@@ -34,6 +35,8 @@ function AppContent() {
       <Stack>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(public)" options={{ headerShown: false }} />
+        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+
         <Stack.Screen
           name="productDetails"
           options={{ headerShown: true, title: "Product Details" }}
@@ -46,7 +49,7 @@ function AppContent() {
       </Stack>
 
       <SignedIn>
-        <SyncUserToFirestore />
+        <RoleBasedRedirect />
       </SignedIn>
       <SignedOut>
         <Redirect href="../(public)/Welcome" />

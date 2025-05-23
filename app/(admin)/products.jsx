@@ -9,6 +9,7 @@ import {
   Alert,
   Image,
 } from "react-native";
+import { useUser } from "@clerk/clerk-expo";
 import {
   getFirestore,
   collection,
@@ -17,23 +18,37 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
-import { Ionicons } from "@expo/vector-icons";
+import ProductCard from "../../components/Card";
+import EditModal from "../../components/Modal/EditModal";
+import { wp } from "../../common/helper";
+import { getStorage, ref } from "firebase/storage";
 
 export default function ProductManagement() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [Data, setData] = useState({});
   const db = getFirestore();
+  const { user, isLoaded } = useUser();
 
   useEffect(() => {
     loadProducts();
   }, []);
 
+  const CheckOwner = () => {
+    if (user?.publicMetadata?.role == "admin") {
+      return true;
+    } else {
+      return false;
+    }
+  };
   const loadProducts = async () => {
     try {
-      const productsCollection = collection(db, "products");
-      const productSnapshot = await getDocs(productsCollection);
-      const productList = productSnapshot.docs.map((doc) => ({
-        id: doc.id,
+      const querySnapshot = await getDocs(collection(db, "UserPosts"));
+      // const productsCollection = collection(db, "UserPosts");
+      // const productSnapshot = await getDocs(productsCollection);
+      const productList = querySnapshot.docs.map((doc) => ({
+        docId: doc.id,
         ...doc.data(),
       }));
       setProducts(productList);
@@ -44,106 +59,121 @@ export default function ProductManagement() {
       setLoading(false);
     }
   };
-
-  const handleToggleStatus = async (productId, currentStatus) => {
-    try {
-      const productRef = doc(db, "products", productId);
-      await updateDoc(productRef, {
-        status: currentStatus === "active" ? "inactive" : "active",
-      });
-      loadProducts();
-      Alert.alert("Success", "Product status updated successfully");
-    } catch (error) {
-      console.error("Error updating product status:", error);
-      Alert.alert("Error", "Failed to update product status");
-    }
+  const getPathFromURL = (url) => {
+    const decodedUrl = decodeURIComponent(url);
+    const match = decodedUrl.match(/\/o\/(.*?)\?/);
+    return match ? match[1] : null;
+  };
+  const handleEdit = (item) => {
+    setData({
+      desc: item.desc,
+      name: item.title,
+      price: item.price,
+    });
+    setModalVisible(true);
+    return Data;
   };
 
-  const handleDeleteProduct = async (productId) => {
+  console.log(products);
+
+  const handledelete = async (item) => {
     Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this product? This action cannot be undone.",
+      "Delete Post",
+      "Are you sure you want to delete this post?",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
-              const productRef = doc(db, "products", productId);
-              await deleteDoc(productRef);
-              loadProducts();
-              Alert.alert("Success", "Product deleted successfully");
+              // Delete Firestore document
+              const docRef = doc(db, "UserPosts", item.docId);
+              await deleteDoc(docRef);
+
+              // Delete the image from storage
+              const imagePath = getPathFromURL(item.image);
+              if (imagePath) {
+                const storage = getStorage();
+                const imageRef = ref(storage, imagePath);
+                await deleteObject(imageRef);
+              }
+
+              // Refresh data
+              GetPostsData();
+              console.log("Post and image deleted");
             } catch (error) {
-              console.error("Error deleting product:", error);
-              Alert.alert("Error", "Failed to delete product");
+              console.error("Error deleting post or image:", error);
             }
           },
         },
-      ]
+      ],
+      { cancelable: true }
     );
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.productCard}>
-      <Image
-        source={{ uri: item.images?.[0] || "https://via.placeholder.com/100" }}
-        style={styles.productImage}
-      />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName}>{item.title || "No Title"}</Text>
-        <Text style={styles.productPrice}>₹{item.price || "0"}</Text>
-        <Text
-          style={[
-            styles.productStatus,
-            { color: item.status === "active" ? "#10b981" : "#ef4444" },
-          ]}
-        >
-          {item.status || "active"}
-        </Text>
-      </View>
-      <View style={styles.actions}>
-        <TouchableOpacity
-          onPress={() => handleToggleStatus(item.id, item.status)}
-          style={[styles.actionButton, { backgroundColor: "#2563eb" }]}
-        >
-          <Ionicons
-            name={item.status === "active" ? "pause-circle" : "play-circle"}
-            size={20}
-            color="white"
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleDeleteProduct(item.id)}
-          style={[styles.actionButton, { backgroundColor: "#ef4444" }]}
-        >
-          <Ionicons name="trash" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+  const handleSubmit = async (item) => {
+    Alert.alert(
+      "Update Post",
+      "Are you sure you want to save the changes?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Update",
+          onPress: async () => {
+            try {
+              setLoading(true); // Show loading during update
+              const docRef = doc(db, "UserPosts", item.docId);
+              await updateDoc(docRef, {
+                title: Data.name, // Note: you're storing as 'name' but displaying as 'title'
+                desc: Data.desc,
+                price: Data.price,
+              });
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
-      </View>
+              console.log("Document successfully updated!");
+              setModalVisible(false);
+
+              // Ensure the update completes before refetching
+              await loadProducts();
+            } catch (error) {
+              console.error("Error updating document: ", error);
+              Alert.alert("Error", "Failed to update product");
+            } finally {
+              setLoading(false);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
     );
-  }
+  };
 
   return (
     <View style={styles.container}>
       <FlatList
+        numColumns={2}
         data={products}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No products found</Text>
-        }
+        keyExtractor={(item) => item.customId}
+        renderItem={({ item }) => (
+          <View>
+            <ProductCard
+              imageUrl={item.image}
+              name={item.title}
+              price={item.price}
+              condition={CheckOwner(item.useremail)}
+              Ondelete={() => handledelete(item)}
+              onEdit={() => handleEdit(item)}
+              width={wp(40)}
+            />
+            <EditModal
+              modalVisible={modalVisible}
+              setModalVisible={setModalVisible}
+              item={Data}
+              setitem={setData}
+              onsubmit={() => handleSubmit(item)}
+            />
+          </View>
+        )}
       />
     </View>
   );
@@ -151,8 +181,9 @@ export default function ProductManagement() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
   },
   loadingContainer: {
     flex: 1,

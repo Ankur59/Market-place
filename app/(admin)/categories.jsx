@@ -9,22 +9,12 @@ import {
   Alert,
   TextInput,
 } from "react-native";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  doc,
-  deleteDoc,
-  addDoc,
-  updateDoc,
-} from "firebase/firestore";
-import { Ionicons } from "@expo/vector-icons";
+import { getFirestore, collection, getDocs, addDoc } from "firebase/firestore";
 
 export default function CategoryManagement() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newCategory, setNewCategory] = useState("");
-  const [editingCategory, setEditingCategory] = useState(null);
   const db = getFirestore();
 
   useEffect(() => {
@@ -33,16 +23,14 @@ export default function CategoryManagement() {
 
   const loadCategories = async () => {
     try {
-      const categoriesCollection = collection(db, "categories");
-      const categorySnapshot = await getDocs(categoriesCollection);
-      const categoryList = categorySnapshot.docs.map((doc) => ({
+      const categoriesSnapshot = await getDocs(collection(db, "Categories"));
+      const categoriesData = categoriesSnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data(),
+        name: doc.data().Name,
       }));
-      setCategories(categoryList);
+      setCategories(categoriesData);
     } catch (error) {
-      console.error("Error loading categories:", error);
-      Alert.alert("Error", "Failed to load categories");
+      console.error("Error fetching categories:", error);
     } finally {
       setLoading(false);
     }
@@ -54,63 +42,38 @@ export default function CategoryManagement() {
       return;
     }
 
-    try {
-      const categoriesCollection = collection(db, "categories");
-      await addDoc(categoriesCollection, {
-        name: newCategory.trim(),
-        createdAt: new Date().toISOString(),
-      });
-      setNewCategory("");
-      loadCategories();
-      Alert.alert("Success", "Category added successfully");
-    } catch (error) {
-      console.error("Error adding category:", error);
-      Alert.alert("Error", "Failed to add category");
-    }
-  };
+    // Check if category already exists
+    const existingCategory = categories.find(
+      (cat) => cat.name.toLowerCase() === newCategory.trim().toLowerCase()
+    );
 
-  const handleUpdateCategory = async (categoryId, newName) => {
-    if (!newName.trim()) {
-      Alert.alert("Error", "Please enter a category name");
+    if (existingCategory) {
+      Alert.alert("Error", "Category already exists");
       return;
     }
 
-    try {
-      const categoryRef = doc(db, "categories", categoryId);
-      await updateDoc(categoryRef, {
-        name: newName.trim(),
-        updatedAt: new Date().toISOString(),
-      });
-      setEditingCategory(null);
-      loadCategories();
-      Alert.alert("Success", "Category updated successfully");
-    } catch (error) {
-      console.error("Error updating category:", error);
-      Alert.alert("Error", "Failed to update category");
-    }
-  };
-
-  const handleDeleteCategory = async (categoryId) => {
+    // Show confirmation alert
     Alert.alert(
-      "Confirm Delete",
-      "Are you sure you want to delete this category? This will not delete the products in this category.",
+      "Confirm Add Category",
+      `Are you sure you want to add the category "${newCategory.trim()}"?`,
       [
         {
           text: "Cancel",
           style: "cancel",
         },
         {
-          text: "Delete",
-          style: "destructive",
+          text: "Yes",
           onPress: async () => {
             try {
-              const categoryRef = doc(db, "categories", categoryId);
-              await deleteDoc(categoryRef);
+              await addDoc(collection(db, "Categories"), {
+                Name: newCategory.trim(),
+              });
+              setNewCategory("");
               loadCategories();
-              Alert.alert("Success", "Category deleted successfully");
+              Alert.alert("Success", "Category added successfully");
             } catch (error) {
-              console.error("Error deleting category:", error);
-              Alert.alert("Error", "Failed to delete category");
+              console.error("Error adding category:", error);
+              Alert.alert("Error", "Failed to add category");
             }
           },
         },
@@ -120,37 +83,7 @@ export default function CategoryManagement() {
 
   const renderItem = ({ item }) => (
     <View style={styles.categoryCard}>
-      {editingCategory === item.id ? (
-        <TextInput
-          style={styles.editInput}
-          value={item.name}
-          onChangeText={(text) => {
-            const updatedCategories = categories.map((cat) =>
-              cat.id === item.id ? { ...cat, name: text } : cat
-            );
-            setCategories(updatedCategories);
-          }}
-          autoFocus
-          onBlur={() => setEditingCategory(null)}
-          onSubmitEditing={() => handleUpdateCategory(item.id, item.name)}
-        />
-      ) : (
-        <Text style={styles.categoryName}>{item.name}</Text>
-      )}
-      <View style={styles.actions}>
-        <TouchableOpacity
-          onPress={() => setEditingCategory(item.id)}
-          style={[styles.actionButton, { backgroundColor: "#2563eb" }]}
-        >
-          <Ionicons name="pencil" size={20} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleDeleteCategory(item.id)}
-          style={[styles.actionButton, { backgroundColor: "#ef4444" }]}
-        >
-          <Ionicons name="trash" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
+      <Text style={styles.categoryName}>{item.name}</Text>
     </View>
   );
 
@@ -158,6 +91,7 @@ export default function CategoryManagement() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2563eb" />
+        <Text style={styles.loadingText}>Loading categories...</Text>
       </View>
     );
   }
@@ -170,6 +104,8 @@ export default function CategoryManagement() {
           placeholder="New category name"
           value={newCategory}
           onChangeText={setNewCategory}
+          onSubmitEditing={handleAddCategory}
+          returnKeyType="done"
         />
         <TouchableOpacity style={styles.addButton} onPress={handleAddCategory}>
           <Text style={styles.addButtonText}>Add Category</Text>
@@ -199,6 +135,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
+  },
   addContainer: {
     padding: 15,
     backgroundColor: "white",
@@ -214,15 +155,6 @@ const styles = StyleSheet.create({
     borderColor: "#e5e5e5",
     borderRadius: 8,
     paddingHorizontal: 10,
-  },
-  editInput: {
-    flex: 1,
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#2563eb",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginRight: 10,
   },
   addButton: {
     backgroundColor: "#2563eb",
@@ -242,8 +174,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     marginBottom: 10,
-    flexDirection: "row",
-    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -254,17 +184,8 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   categoryName: {
-    flex: 1,
     fontSize: 16,
     fontWeight: "500",
-  },
-  actions: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  actionButton: {
-    padding: 8,
-    borderRadius: 8,
   },
   emptyText: {
     textAlign: "center",

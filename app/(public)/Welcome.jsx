@@ -61,7 +61,7 @@ const Welcome = () => {
             activeOpacity={0.5}
             onPress={() => router.push("/register")}
           >
-            <Text style={styles.signupButtonText}>Sign-up</Text>
+            <Text style={styles.signupButtonText}>Register</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -92,25 +92,6 @@ const Welcome = () => {
               Sign in
             </Text>
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.adminButton,
-              {
-                backgroundColor: Theme === "dark" ? "#7c3aed" : "#7c3aed",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
-              },
-            ]}
-            activeOpacity={0.5}
-            onPress={() => router.push("/adminLogin")}
-          >
-            <Ionicons name="shield-outline" size={18} color="white" />
-            <Text style={styles.signupButtonText}>Admin Login</Text>
-          </TouchableOpacity>
-
           <View style={styles.spacer}></View>
         </View>
       </View>
@@ -166,10 +147,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   signupButton: {
-    width: "100%",
+    width: "70%",
     padding: 15,
     borderRadius: 10,
-    marginBottom: 10,
+    marginTop: 40,
+    marginBottom: 20,
   },
   signupButtonText: {
     color: "#fff",
@@ -178,8 +160,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   signinButton: {
-    width: "100%",
+    width: "70%",
     padding: 15,
+    marginTop: 10,
     borderRadius: 10,
     borderWidth: 1,
     marginBottom: 10,

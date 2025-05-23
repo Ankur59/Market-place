@@ -11,42 +11,39 @@ export default function AdminLayout() {
   const router = useRouter();
   const { user } = useUser();
 
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        router.replace("/");
-        return;
-      }
-
-      const adminStatus = await AsyncStorage.getItem(`admin_${user.id}`);
-      if (!adminStatus) {
-        router.replace("/");
-      } else {
-        setIsAdmin(true);
-      }
-      setLoading(false);
-    };
-
-    checkAdminStatus();
-  }, [user]);
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
-  if (!isAdmin) {
-    return null;
-  }
-
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <Stack>
+      
+      <Stack.Screen
+        name="category"
+        screenOptions={{
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="dashboard"
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="product"
+        screenOptions={{
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="reports"
+        screenOptions={{
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="users"
+        screenOptions={{
+          headerShown: true,
+        }}
+      />
+    </Stack>
   );
 }

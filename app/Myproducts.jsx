@@ -20,6 +20,7 @@ import { app } from "../firebaseconfig";
 import { useUser } from "@clerk/clerk-expo";
 import ProductCard from "../components/Card";
 import EditModal from "../components/Modal/EditModal";
+import { hp, wp } from "../common/helper";
 
 const Myproducts = () => {
   const [MyProducts, SetMyProducts] = useState([]);
@@ -168,6 +169,7 @@ const Myproducts = () => {
                   condition={CheckOwner(item.useremail)}
                   Ondelete={() => handledelete(item)}
                   onEdit={() => handleEdit(item)}
+                  width={wp(40)}
                 />
                 <EditModal
                   modalVisible={modalVisible}

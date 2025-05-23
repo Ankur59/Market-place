@@ -38,14 +38,14 @@ export default function Reports() {
       const totalUsers = usersSnapshot.size;
 
       // Get products stats
-      const productsSnapshot = await getDocs(collection(db, "products"));
+      const productsSnapshot = await getDocs(collection(db, "UserPosts"));
       const totalProducts = productsSnapshot.size;
       const activeProducts = productsSnapshot.docs.filter(
         (doc) => doc.data().status === "active"
       ).length;
 
       // Get categories count
-      const categoriesSnapshot = await getDocs(collection(db, "categories"));
+      const categoriesSnapshot = await getDocs(collection(db, "Categories"));
       const totalCategories = categoriesSnapshot.size;
 
       // Get recent activity (last 10 products)
@@ -129,12 +129,6 @@ export default function Reports() {
             value={stats.totalProducts}
             icon="cube"
             color="#10b981"
-          />
-          <StatCard
-            title="Active Products"
-            value={stats.activeProducts}
-            icon="checkmark-circle"
-            color="#f59e0b"
           />
           <StatCard
             title="Categories"
